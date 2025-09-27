@@ -47,7 +47,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     public CurrencyResponse getCurrencyById(Long id) {
         Currency currency = currencyRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Currency not found with ID: " + id));
+                .orElseThrow(() -> new Error("Currency not found with ID: " + id));
 
         return currencyMapper.toResponse(currency);
     }

@@ -2,7 +2,6 @@ package com.financial.api.controller.api.v1;
 
 import com.financial.api.dto.request.CurrencyCreateRequest;
 import com.financial.api.dto.response.CurrencyResponse;
-import com.financial.api.dto.response.UserResponse;
 import com.financial.api.service.CurrencyService;
 import com.financial.api.util.ApiResponse;
 import jakarta.validation.Valid;
@@ -32,7 +31,7 @@ public class CurrencyController {
     public ResponseEntity<ApiResponse<CurrencyResponse>> getUserById(@PathVariable Long id) {
         CurrencyResponse currency = currencyService.getCurrencyById(id);
         ApiResponse<CurrencyResponse> response = ApiResponse.success(currency);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

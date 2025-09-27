@@ -7,6 +7,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
