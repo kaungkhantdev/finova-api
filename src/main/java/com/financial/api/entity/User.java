@@ -7,7 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -33,6 +35,27 @@ public class User extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @Column(nullable = false)
+    private boolean enabled = true;           // is account active?
+
+    @Column(name = "account_non_locked", nullable = false)
+    private boolean accountNonLocked = true;  // is account locked?
+
+    @Column(name = "account_non_expired", nullable = false)
+    private boolean accountNonExpired = true; // has account expired?
+
+    @Column(name = "credentials_non_expired", nullable = false)
+    private boolean credentialsNonExpired = true; // has password expired?
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_id", referencedColumnName = "id")
