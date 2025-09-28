@@ -1,6 +1,6 @@
 -- Initial schema for financial API
 
-CREATE TABLE currencies (
+CREATE TABLE IF NOT EXISTS currencies (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     currency VARCHAR(100) NOT NULL,
     currency_code VARCHAR(10) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE currencies (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -22,7 +22,7 @@ CREATE TABLE categories (
 
 -- Users And Roles
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -41,7 +41,15 @@ CREATE TABLE users (
     CONSTRAINT fk_users_currency FOREIGN KEY (currency_id) REFERENCES currencies(id)
 );
 
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_roles (
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
     PRIMARY KEY (user_id, role_id),
@@ -49,16 +57,8 @@ CREATE TABLE user_roles (
     CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
-CREATE TABLE roles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    is_default BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
 
-
-CREATE TABLE accounts (
+CREATE TABLE IF NOT EXISTS accounts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -74,7 +74,7 @@ CREATE TABLE accounts (
     CONSTRAINT fk_accounts_currency FOREIGN KEY (currency_id) REFERENCES currencies(id)
 );
 
-CREATE TABLE transaction_types (
+CREATE TABLE IF NOT EXISTS transaction_types (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -83,7 +83,7 @@ CREATE TABLE transaction_types (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -101,7 +101,7 @@ CREATE TABLE transactions (
     CONSTRAINT fk_transactions_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
-CREATE TABLE otps (
+CREATE TABLE IF NOT EXISTS otps (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     otp VARCHAR(100) NOT NULL,

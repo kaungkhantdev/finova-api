@@ -24,7 +24,7 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private int jwtExpirationInMs;
 
-    @Value("${jwt.refresh-expiration}")
+    @Value("${jwt.refresh_expiration}")
     private int refreshExpirationInMs;
 
     public String extractUsername(String token) {

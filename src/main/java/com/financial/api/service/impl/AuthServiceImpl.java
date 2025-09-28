@@ -4,10 +4,14 @@ import com.financial.api.dto.request.LoginRequest;
 import com.financial.api.dto.request.RegisterRequest;
 import com.financial.api.dto.request.RefreshTokenRequest;
 import com.financial.api.dto.response.AuthResponse;
+import com.financial.api.entity.Role;
 import com.financial.api.entity.User;
+import com.financial.api.repository.RoleRepository;
 import com.financial.api.repository.UserRepository;
 import com.financial.api.security.JwtTokenProvider;
 import com.financial.api.service.AuthService;
+import com.financial.api.util.EmailParser;
+import com.financial.api.util.EmailParts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,10 +31,12 @@ import java.util.List;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final EmailParser emailParser;
 
     @Override
     @Transactional
@@ -39,17 +45,22 @@ public class AuthServiceImpl implements AuthService {
             throw new Error("Email already exists");
         }
 
+        EmailParts parse = emailParser.parse(request.getEmail());
+
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEmail(request.getEmail());
+        user.setName(request.getName());
+        user.setUsername(parse.getUserName());
+        Role role = roleRepository.findByName("USER")
+                .orElseThrow(() -> new IllegalArgumentException("Role USER not found"));
+        user.getRoles().add(role);
 
         userRepository.save(user);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtTokenProvider.generateToken(userDetails);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
-
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

@@ -4,7 +4,9 @@ import com.financial.api.dto.request.LoginRequest;
 import com.financial.api.dto.request.RegisterRequest;
 import com.financial.api.dto.request.RefreshTokenRequest;
 import com.financial.api.dto.response.AuthResponse;
+import com.financial.api.dto.response.CurrencyResponse;
 import com.financial.api.service.AuthService;
+import com.financial.api.util.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,23 +20,42 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        AuthResponse registered = authService.register(request);
+        ApiResponse<AuthResponse> response = ApiResponse.success(
+                "Register successfully",
+                registered
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse login = authService.login(request);
+        ApiResponse<AuthResponse> response = ApiResponse.success(
+                "Login successfully",
+                login
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request));
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse refreshToken = authService.refreshToken(request);
+        ApiResponse<AuthResponse> response = ApiResponse.success(
+                "Login successfully",
+                refreshToken
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<ApiResponse<AuthResponse>> logout() {
         // In stateless JWT, logout is handled client-side by removing the token
-        return ResponseEntity.ok().build();
+        ApiResponse<AuthResponse> response = ApiResponse.success(
+                "Logout successfully",
+                null
+        );
+        return ResponseEntity.ok(response);
     }
 }
