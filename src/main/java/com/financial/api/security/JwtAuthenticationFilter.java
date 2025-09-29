@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financial.api.util.ApiResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
+import static com.financial.api.config.SecurityConstants.ACCESS_TOKEN;
 
 @Slf4j
 @Component
@@ -40,12 +43,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+
+        // Extract token from either Authorization header or cookies
+        jwt = extractToken(request);
+
+        // If no token found in either location, send error
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        jwt = authHeader.substring(7);
 
         try {
             userEmail = jwtTokenProvider.extractUsername(jwt);
@@ -84,5 +94,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ApiResponse<Void> errorResponse = ApiResponse.error(message);
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+    }
+
+    // Extract JWT token from either Authorization header (Bearer token) or from cookies
+    private String extractToken(HttpServletRequest request) {
+        // First, try to get token from Authorization header
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+
+        // If no Bearer token, try to get from cookies
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (ACCESS_TOKEN.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }
