@@ -1,5 +1,6 @@
 package com.financial.api.config;
 
+import com.financial.api.security.CustomAuthenticationEntryPoint;
 import com.financial.api.security.JwtAuthenticationFilter;
 import com.financial.api.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -42,7 +45,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                );;
 
         return http.build();
     }
