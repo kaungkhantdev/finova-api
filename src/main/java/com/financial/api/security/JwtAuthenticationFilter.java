@@ -17,11 +17,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 import static com.financial.api.config.SecurityConstants.ACCESS_TOKEN;
+import static com.financial.api.config.SecurityConstants.PUBLIC_URLS;
 
 @Slf4j
 @Component
@@ -31,6 +33,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        for (String pattern : PUBLIC_URLS) {
+            if (pathMatcher.match(pattern, path)) {
+                return true; // Skip filter for public routes
+            }
+        }
+        return false;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -42,6 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
+
 
 //        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 //            filterChain.doFilter(request, response);
