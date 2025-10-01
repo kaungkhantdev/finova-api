@@ -16,7 +16,7 @@ WORKDIR /usr/src/app
 
 RUN groupadd --system appgroup && useradd --system -g appgroup appuser
 
-COPY --chown=appuser:appgroup --from=builder /usr/src/app/target/your-artifact-id-*.jar /usr/src/app/app.jar
+COPY --chown=appuser:appgroup --from=builder /usr/src/app/target/*.jar /usr/src/app/app.jar
 
 USER appuser
 
