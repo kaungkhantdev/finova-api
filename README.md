@@ -208,11 +208,14 @@ java -jar target/financial-api-1.0.0.jar
 
 ### Docker
 ```bash
+# copy .env
+cp .env.example .env
+
 # Build image
 docker build -t financial-api .
 
 # Run container
-docker run -p 8080:8080 financial-api
+docker run -p 8080:8080 --env-file .env financial-api
 ```
 
 The API will be available at: `http://localhost:8080`
