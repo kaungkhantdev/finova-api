@@ -49,6 +49,8 @@ jobs:
             DB_URL: jdbc:mysql://127.0.0.1:3306/financial
             DB_USER_NAME: appuser
             DB_PASSWORD: 123456
+            FFLYWAY_ENABLED: true
+            FLYWAY_LOCATIONS: classpath:db/migration
                     
         runs-on: ubuntu-latest
         services:
@@ -89,8 +91,8 @@ jobs:
                 done
             
             - name: Flyway Migrations
-              run: mvn flyway:migrate \
-                -Dflyway.url=jdbc:mysql://localhost:3306/financial \
+              run: mvn -B flyway:migrate \
+                -Dflyway.url=jdbc:mysql://127.0.0.1:3306/financial \
                 -Dflyway.user=appuser \
                 -Dflyway.password=123456
             - name: Run tests with coverage
