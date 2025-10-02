@@ -9,7 +9,7 @@ INSERT INTO currencies (currency, currency_code, symbol) VALUES
 -- ========================
 -- Dummy data for roles
 -- ========================
-INSERT INTO roles (name, is_default) VALUES
+INSERT INTO roles (name, is_deleted) VALUES
 ('USER', TRUE),
 ('ADMIN', FALSE);
 
