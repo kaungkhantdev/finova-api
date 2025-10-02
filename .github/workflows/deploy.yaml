@@ -49,6 +49,7 @@ jobs:
             DB_URL: jdbc:mysql://127.0.0.1:3306/financial
             DB_USER_NAME: appuser
             DB_PASSWORD: 123456
+            FLYWAY_ENABLED: false
                     
         runs-on: ubuntu-latest
         services:
@@ -77,6 +78,16 @@ jobs:
                     distribution: 'temurin'
                     java-version: '21'
                     cache: 'maven'
+            - name: Wait for MySQL
+              run: |
+                for i in {1..30}; do
+                if mysqladmin ping -h 127.0.0.1 -P 3306 -u appuser -p123456 --silent; then
+                    echo "MySQL is ready"
+                    break
+                fi
+                echo "Waiting for MySQL... ($i/30)"
+                sleep 2
+                done
             - name: Run tests with coverage
               run: mvn -B clean test
 
