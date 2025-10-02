@@ -49,8 +49,6 @@ jobs:
             DB_URL: jdbc:mysql://127.0.0.1:3306/financial
             DB_USER_NAME: appuser
             DB_PASSWORD: 123456
-            FFLYWAY_ENABLED: true
-            FLYWAY_LOCATIONS: classpath:db/migration
                     
         runs-on: ubuntu-latest
         services:
