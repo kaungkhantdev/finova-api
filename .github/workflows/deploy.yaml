@@ -46,9 +46,9 @@ jobs:
 
     test: 
         env:
-            DB_URL: jdbc:mysql://localhost:3306/financial
-            MYSQL_USER: appuser
-            MYSQL_PASSWORD: 123456
+            DB_URL: jdbc:mysql://127.0.0.1:3306/financial
+            DB_USER_NAME: appuser
+            DB_PASSWORD: 123456
                     
         runs-on: ubuntu-latest
         services:
@@ -77,7 +77,6 @@ jobs:
                     distribution: 'temurin'
                     java-version: '21'
                     cache: 'maven'
-
             - name: Run tests with coverage
               run: mvn -B clean test
 
