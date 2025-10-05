@@ -7,23 +7,35 @@ import com.financial.api.dto.response.AuthResponse;
 import com.financial.api.service.AuthService;
 import com.financial.api.util.ApiResponse;
 import com.financial.api.util.CookieUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.financial.api.config.OpenApiConfig.BEARER_AUTH;
 import static com.financial.api.config.SecurityConstants.REFRESH_TOKEN;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Authentication endpoints for web and mobile clients")
 public class AuthController {
 
     private final AuthService authService;
     private final CookieUtil cookieUtil;
 
+    // ==================== WEB ENDPOINTS (Cookie-based) ====================
+
     @PostMapping("/register")
+    @Operation(
+            summary = "Register a new user (Web)",
+            description = "Create a new user account. Returns JWT tokens in HTTP-only cookies."
+    )
+    @SecurityRequirement(name = "") // No authentication required
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse authResponse = authService.register(request);
 
@@ -39,6 +51,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(
+            summary = "Login user (Web)",
+            description = "Authenticate user and return JWT tokens in HTTP-only cookies."
+    )
+    @SecurityRequirement(name = "") // No authentication required
     public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse authResponse = authService.login(request);
 
@@ -54,6 +71,10 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(
+            summary = "Refresh access token (Web)",
+            description = "Get a new access token using the refresh token from cookie."
+    )
     public ResponseEntity<ApiResponse<String>> refreshToken(
             @CookieValue(name = REFRESH_TOKEN, required = false) String refreshToken) {
 
@@ -74,6 +95,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Operation(
+            summary = "Logout user (Web)",
+            description = "Clear authentication cookies."
+    )
     public ResponseEntity<ApiResponse<String>> logout() {
         String deleteAccessToken = cookieUtil.deleteAccessTokenCookie();
         String deleteRefreshToken = cookieUtil.deleteRefreshTokenCookie();
@@ -86,9 +111,14 @@ public class AuthController {
                 .body(response);
     }
 
-    /** MOBILE **/
+    // ==================== MOBILE ENDPOINTS (Bearer Token) ====================
 
     @PostMapping("/mobile/register")
+    @Operation(
+            summary = "Register a new user (Mobile)",
+            description = "Create a new user account. Returns JWT tokens in response body."
+    )
+    @SecurityRequirement(name = "") // No authentication required
     public ResponseEntity<ApiResponse<AuthResponse>> mobileRegister(@Valid @RequestBody RegisterRequest request) {
         AuthResponse registered = authService.register(request);
         ApiResponse<AuthResponse> response = ApiResponse.success(
@@ -99,6 +129,11 @@ public class AuthController {
     }
 
     @PostMapping("/mobile/login")
+    @Operation(
+            summary = "Login user (Mobile)",
+            description = "Authenticate user and return JWT tokens in response body."
+    )
+    @SecurityRequirement(name = "") // No authentication required
     public ResponseEntity<ApiResponse<AuthResponse>> mobileLogin(@Valid @RequestBody LoginRequest request) {
         AuthResponse login = authService.login(request);
         ApiResponse<AuthResponse> response = ApiResponse.success(
@@ -106,21 +141,29 @@ public class AuthController {
                 login
         );
         return ResponseEntity.ok(response);
-
     }
 
-
     @PostMapping("/mobile/refresh")
+    @Operation(
+            summary = "Refresh access token (Mobile)",
+            description = "Get a new access token using the refresh token from request body."
+    )
+    @SecurityRequirement(name = BEARER_AUTH)
     public ResponseEntity<ApiResponse<AuthResponse>> mobileRefreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         AuthResponse refreshToken = authService.refreshToken(request);
         ApiResponse<AuthResponse> response = ApiResponse.success(
-                "Login successfully",
+                "Token refreshed successfully",
                 refreshToken
         );
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/mobile/logout")
+    @Operation(
+            summary = "Logout user (Mobile)",
+            description = "In stateless JWT, logout is handled client-side by removing the token."
+    )
+    @SecurityRequirement(name = BEARER_AUTH)
     public ResponseEntity<ApiResponse<String>> mobileLogout() {
         // In stateless JWT, logout is handled client-side by removing the token
         ApiResponse<String> response = ApiResponse.success(
@@ -129,5 +172,4 @@ public class AuthController {
         );
         return ResponseEntity.ok(response);
     }
-
 }

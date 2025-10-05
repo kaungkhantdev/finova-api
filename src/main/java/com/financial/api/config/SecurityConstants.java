@@ -7,7 +7,11 @@ public class SecurityConstants {
             "/api/v1/auth/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/actuator/health"
+            "/actuator/health",
+            "/api-docs/**",
+            "/swagger-ui.html",
+            "/swagger-resources/**",
+            "/webjars/**"
     };
 
     public static final String ADMIN_URL = "/api/v1/admin/**";

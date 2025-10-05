@@ -101,6 +101,7 @@ public class ApiPaginationMetadata {
     /**
      * Get page range for pagination display (e.g., "Showing 1-10 of 100")
      */
+    @JsonProperty("display_range")
     public String getDisplayRange() {
         if (totalItems == 0) {
             return "0-0 of 0";

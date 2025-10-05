@@ -8,6 +8,8 @@ import com.financial.api.entity.Currency;
 import com.financial.api.repository.CurrencyRepository;
 import com.financial.api.service.CurrencyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -18,6 +20,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     private final CurrencyRepository currencyRepository;
     private final CurrencyMapper currencyMapper;
+
+    @Override
+    public Page<CurrencyResponse> getAll(Pageable pageable) {
+        return currencyRepository.findAll(pageable).map(currencyMapper::toResponse);
+    }
 
     @Override
     public CurrencyResponse createCurrency(CurrencyCreateRequest request) {
