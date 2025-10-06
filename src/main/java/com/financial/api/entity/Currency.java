@@ -1,15 +1,15 @@
 package com.financial.api.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "currencies")
+@Table(name = "currencies", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "code"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,4 +23,11 @@ public class Currency extends BaseEntity{
 
     @Column(name = "symbol", length = 10)
     private String symbol; // "$", "€", "£"
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user; // NULL for system currencies
+
+    @Column(name = "is_system", nullable = false)
+    private Boolean isSystem = false; // true for default/system currencies
 }

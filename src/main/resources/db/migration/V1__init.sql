@@ -1,27 +1,32 @@
 -- Initial schema for financial API
 
+-- ========================
+-- Step 1: Create tables without circular dependencies
+-- ========================
+
+-- Create roles first (no dependencies)
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create currencies WITHOUT user_id foreign key first
 CREATE TABLE IF NOT EXISTS currencies (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     currency VARCHAR(100) NOT NULL,
     currency_code VARCHAR(10) NOT NULL,
     symbol VARCHAR(10),
+    user_id BIGINT,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS categories (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    avatar_url TEXT,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Users And Roles
-
+-- Create users table (references currencies)
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -41,14 +46,17 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT fk_users_currency FOREIGN KEY (currency_id) REFERENCES currencies(id)
 );
 
-CREATE TABLE IF NOT EXISTS roles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- ========================
+-- Step 2: Add foreign key constraint from currencies to users
+-- ========================
+ALTER TABLE currencies
+ADD CONSTRAINT fk_currencies_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+-- Add unique constraint for user-specific currency codes
+ALTER TABLE currencies
+ADD CONSTRAINT uk_currency_user_code UNIQUE (user_id, currency_code);
+
+-- Create user_roles junction table
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
@@ -57,7 +65,25 @@ CREATE TABLE IF NOT EXISTS user_roles (
     CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
+-- Create categories table
+CREATE TABLE IF NOT EXISTS categories (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    avatar_url TEXT,
+    user_id BIGINT,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_categories_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
+-- Add unique constraint for user-specific category names
+ALTER TABLE categories
+ADD CONSTRAINT uk_category_user_name UNIQUE (user_id, name);
+
+-- Create accounts table
 CREATE TABLE IF NOT EXISTS accounts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -74,6 +100,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     CONSTRAINT fk_accounts_currency FOREIGN KEY (currency_id) REFERENCES currencies(id)
 );
 
+-- Create transaction_types table
 CREATE TABLE IF NOT EXISTS transaction_types (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -83,6 +110,7 @@ CREATE TABLE IF NOT EXISTS transaction_types (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Create transactions table
 CREATE TABLE IF NOT EXISTS transactions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -101,6 +129,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     CONSTRAINT fk_transactions_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
+-- Create otps table
 CREATE TABLE IF NOT EXISTS otps (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
@@ -109,3 +138,39 @@ CREATE TABLE IF NOT EXISTS otps (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- ========================
+-- Insert default data
+-- ========================
+
+-- Insert default roles
+INSERT INTO roles (name) VALUES
+('ROLE_USER'),
+('ROLE_ADMIN');
+
+-- Insert default system currencies
+INSERT INTO currencies (currency, currency_code, symbol, user_id, is_system) VALUES
+('US Dollar', 'USD', '$', NULL, TRUE),
+('Euro', 'EUR', '€', NULL, TRUE),
+('British Pound', 'GBP', '£', NULL, TRUE),
+('Japanese Yen', 'JPY', '¥', NULL, TRUE),
+('Thai Baht', 'THB', '฿', NULL, TRUE);
+
+-- Insert default system categories
+INSERT INTO categories (name, description, user_id, is_system) VALUES
+('Food & Dining', 'Restaurants, groceries, and food delivery', NULL, TRUE),
+('Transportation', 'Public transit, gas, parking, and ride-sharing', NULL, TRUE),
+('Shopping', 'Clothing, electronics, and general shopping', NULL, TRUE),
+('Entertainment', 'Movies, games, concerts, and hobbies', NULL, TRUE),
+('Bills & Utilities', 'Electricity, water, internet, and phone bills', NULL, TRUE),
+('Healthcare', 'Medical expenses, insurance, and pharmacy', NULL, TRUE),
+('Education', 'Tuition, books, and courses', NULL, TRUE),
+('Travel', 'Flights, hotels, and vacation expenses', NULL, TRUE),
+('Income', 'Salary, bonuses, and other income sources', NULL, TRUE),
+('Savings', 'Emergency fund, investments, and savings accounts', NULL, TRUE);
+
+-- Insert default transaction types
+INSERT INTO transaction_types (name, description) VALUES
+('Income', 'Money received'),
+('Expense', 'Money spent'),
+('Transfer', 'Money transferred between accounts');
