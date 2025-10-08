@@ -95,13 +95,13 @@ public class CurrencyController {
         return ResponseEntity.ok(ApiResponse.success("Currency updated successfully", currency));
     }
 
-//    @DeleteMapping("/{id}")
-//    @Operation(
-//            summary = "Delete currency",
-//            description = "Delete a currency by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
-//    )
-//    public ResponseEntity<ApiResponse<Void>> deleteCurrency(@PathVariable Long id) {
-//        currencyService.deleteCurrency(id);
-//        return ResponseEntity.ok(ApiResponse.success("Currency deleted successfully", null));
-//    }
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete currency",
+            description = "Delete a currency by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
+    )
+    public ResponseEntity<ApiResponse<Void>> deleteCurrency(@PathVariable Long id) {
+        currencyService.deleteCurrency(id);
+        return ResponseEntity.ok(ApiResponse.success("Currency deleted successfully", null));
+    }
 }

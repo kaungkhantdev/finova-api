@@ -11,4 +11,6 @@ public interface CurrencyService {
     CurrencyResponse createCurrency(CurrencyCreateRequest request);
     CurrencyResponse updateCurrency(Long id, CurrencyUpdateRequest request);
     CurrencyResponse getCurrencyById(Long id);
+    void deleteCurrency(Long id);
 }
+
