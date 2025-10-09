@@ -6,7 +6,6 @@ import com.financial.api.dto.request.CategoryUpdateRequest;
 import com.financial.api.dto.response.CategoryResponse;
 import com.financial.api.entity.*;
 import com.financial.api.entity.Category;
-import com.financial.api.entity.Category;
 import com.financial.api.repository.CategoryRepository;
 import com.financial.api.service.CategoryService;
 import com.financial.api.util.AuthenticationUtil;
