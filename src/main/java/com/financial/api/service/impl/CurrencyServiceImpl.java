@@ -84,7 +84,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     @Transactional(readOnly = true)
     public CurrencyResponse getCurrencyById(Long id) {
-        User currentUser = getCurrentUser();
+//        User currentUser = getCurrentUser();
 
         Currency currency = currencyRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Currency not found with ID: " + id));
