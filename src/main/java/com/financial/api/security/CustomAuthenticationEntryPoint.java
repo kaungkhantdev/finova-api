@@ -1,7 +1,7 @@
 package com.financial.api.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.financial.api.util.ApiResponse;
+import com.financial.api.util.AppApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +34,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ApiResponse<Void> errorResponse = ApiResponse.error("Unauthorized - Authentication required");
+        AppApiResponse<Void> errorResponse = AppApiResponse.error("Unauthorized - Authentication required");
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }

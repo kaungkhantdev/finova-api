@@ -4,6 +4,7 @@ import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
 import com.financial.api.service.AccountService;
+import com.financial.api.util.AppApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,10 +43,11 @@ public class AccountController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(
+    public ResponseEntity<AppApiResponse<AccountResponse>> createAccount(
             @Valid @RequestBody AccountCreateRequest request) {
 
-        AccountResponse response = accountService.createAccount(request);
+        AccountResponse createdAccount = accountService.createAccount(request);
+        AppApiResponse<AccountResponse> response = AppApiResponse.success(createdAccount);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -62,12 +64,13 @@ public class AccountController {
             @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
     })
     @PutMapping("/{id}")
-    public ResponseEntity<AccountResponse> updateAccount(
+    public ResponseEntity<AppApiResponse<AccountResponse>> updateAccount(
             @Parameter(description = "ID of the account to update", example = "1")
             @PathVariable Long id,
             @Valid @RequestBody AccountUpdateRequest request) {
 
-        AccountResponse response = accountService.updateAccount(id, request);
+        AccountResponse updatedAccount = accountService.updateAccount(id, request);
+        AppApiResponse<AccountResponse> response = AppApiResponse.success(updatedAccount);
         return ResponseEntity.ok(response);
     }
 
@@ -82,11 +85,12 @@ public class AccountController {
             @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
     })
     @GetMapping("/{id}")
-    public ResponseEntity<AccountResponse> getAccountById(
+    public ResponseEntity<AppApiResponse<AccountResponse>> getAccountById(
             @Parameter(description = "ID of the account to retrieve", example = "1")
             @PathVariable Long id) {
 
-        AccountResponse response = accountService.getAccountById(id);
+        AccountResponse account = accountService.getAccountById(id);
+        AppApiResponse<AccountResponse> response = AppApiResponse.success(account);
         return ResponseEntity.ok(response);
     }
     

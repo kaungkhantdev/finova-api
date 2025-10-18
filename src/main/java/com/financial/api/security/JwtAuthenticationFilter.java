@@ -1,7 +1,7 @@
 package com.financial.api.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.financial.api.util.ApiResponse;
+import com.financial.api.util.AppApiResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -107,7 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ApiResponse<Void> errorResponse = ApiResponse.error(message);
+        AppApiResponse<Void> errorResponse = AppApiResponse.error(message);
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }

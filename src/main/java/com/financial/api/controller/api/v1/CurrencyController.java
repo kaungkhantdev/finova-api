@@ -5,7 +5,7 @@ import com.financial.api.dto.request.CurrencyUpdateRequest;
 import com.financial.api.dto.response.CurrencyResponse;
 import com.financial.api.service.CurrencyService;
 import com.financial.api.util.ApiPaginationMetadata;
-import com.financial.api.util.ApiResponse;
+import com.financial.api.util.AppApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,13 +36,13 @@ public class CurrencyController {
             summary = "Get all currencies",
             description = "Retrieve paginated list of all currencies. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<List<CurrencyResponse>>> getAll(
+    public ResponseEntity<AppApiResponse<List<CurrencyResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<CurrencyResponse> currencies = currencyService.getAll(pageable);
-        ApiResponse<List<CurrencyResponse>> response = ApiResponse.success(
+        AppApiResponse<List<CurrencyResponse>> response = AppApiResponse.success(
                 "Get all currencies successfully",
                 currencies.getContent(),
                 new ApiPaginationMetadata(
@@ -60,10 +60,10 @@ public class CurrencyController {
             summary = "Create a new currency",
             description = "Create a new currency in the system. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<CurrencyResponse>> createCurrency(
+    public ResponseEntity<AppApiResponse<CurrencyResponse>> createCurrency(
             @Valid @RequestBody CurrencyCreateRequest request) {
         CurrencyResponse createdCurrency = currencyService.createCurrency(request);
-        ApiResponse<CurrencyResponse> response = ApiResponse.success(
+        AppApiResponse<CurrencyResponse> response = AppApiResponse.success(
                 "Currency created successfully",
                 createdCurrency
         );
@@ -76,9 +76,9 @@ public class CurrencyController {
             summary = "Get currency by ID",
             description = "Retrieve currency details by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<CurrencyResponse>> getCurrencyById(@PathVariable Long id) {
+    public ResponseEntity<AppApiResponse<CurrencyResponse>> getCurrencyById(@PathVariable Long id) {
         CurrencyResponse currency = currencyService.getCurrencyById(id);
-        ApiResponse<CurrencyResponse> response = ApiResponse.success(currency);
+        AppApiResponse<CurrencyResponse> response = AppApiResponse.success(currency);
         return ResponseEntity.ok(response);
     }
 
@@ -87,12 +87,12 @@ public class CurrencyController {
             summary = "Update currency",
             description = "Update an existing currency. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<CurrencyResponse>> updateCurrency(
+    public ResponseEntity<AppApiResponse<CurrencyResponse>> updateCurrency(
             @PathVariable Long id,
             @Valid @RequestBody CurrencyUpdateRequest request) {
 
         CurrencyResponse currency = currencyService.updateCurrency(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Currency updated successfully", currency));
+        return ResponseEntity.ok(AppApiResponse.success("Currency updated successfully", currency));
     }
 
     @DeleteMapping("/{id}")
@@ -100,8 +100,8 @@ public class CurrencyController {
             summary = "Delete currency",
             description = "Delete a currency by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<Void>> deleteCurrency(@PathVariable Long id) {
+    public ResponseEntity<AppApiResponse<Void>> deleteCurrency(@PathVariable Long id) {
         currencyService.deleteCurrency(id);
-        return ResponseEntity.ok(ApiResponse.success("Currency deleted successfully", null));
+        return ResponseEntity.ok(AppApiResponse.success("Currency deleted successfully", null));
     }
 }

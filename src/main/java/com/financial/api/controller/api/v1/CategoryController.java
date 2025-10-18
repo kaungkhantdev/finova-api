@@ -2,12 +2,10 @@ package com.financial.api.controller.api.v1;
 
 import com.financial.api.dto.request.CategoryCreateRequest;
 import com.financial.api.dto.request.CategoryUpdateRequest;
-import com.financial.api.dto.request.CategoryUpdateRequest;
-import com.financial.api.dto.response.CategoryResponse;
 import com.financial.api.dto.response.CategoryResponse;
 import com.financial.api.service.CategoryService;
 import com.financial.api.util.ApiPaginationMetadata;
-import com.financial.api.util.ApiResponse;
+import com.financial.api.util.AppApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,13 +36,13 @@ public class CategoryController {
             summary = "Get all categories",
             description = "Retrieve paginated list of all categories. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll(
+    public ResponseEntity<AppApiResponse<List<CategoryResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<CategoryResponse> categories = categoryService.getAll(pageable);
-        ApiResponse<List<CategoryResponse>> response = ApiResponse.success(
+        AppApiResponse<List<CategoryResponse>> response = AppApiResponse.success(
                 "Get All Categories Successfully",
                 categories.getContent(),
                 new ApiPaginationMetadata(
@@ -63,11 +61,11 @@ public class CategoryController {
             summary = "Create a new category",
             description = "Create a new category in the system. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
+    public ResponseEntity<AppApiResponse<CategoryResponse>> createCategory(
             @Valid @RequestBody CategoryCreateRequest request
     ) {
         CategoryResponse createdCategory = categoryService.createCategory(request);
-        ApiResponse<CategoryResponse> response = ApiResponse.success(
+        AppApiResponse<CategoryResponse> response = AppApiResponse.success(
                 "Category created successfully",
                 createdCategory
         );
@@ -80,9 +78,9 @@ public class CategoryController {
             summary = "Get category by ID",
             description = "Retrieve category details by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<AppApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
         CategoryResponse category = categoryService.getCategoryById(id);
-        ApiResponse<CategoryResponse> response = ApiResponse.success(category);
+        AppApiResponse<CategoryResponse> response = AppApiResponse.success(category);
         return ResponseEntity.ok(response);
     }
 
@@ -91,12 +89,12 @@ public class CategoryController {
             summary = "Update category",
             description = "Update an existing category. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
+    public ResponseEntity<AppApiResponse<CategoryResponse>> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CategoryUpdateRequest request) {
 
         CategoryResponse category = categoryService.updateCategory(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Category updated successfully", category));
+        return ResponseEntity.ok(AppApiResponse.success("Category updated successfully", category));
     }
 
     @DeleteMapping("/{id}")
@@ -104,8 +102,8 @@ public class CategoryController {
             summary = "Delete category",
             description = "Delete a category by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<AppApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
+        return ResponseEntity.ok(AppApiResponse.success("Category deleted successfully", null));
     }
 }

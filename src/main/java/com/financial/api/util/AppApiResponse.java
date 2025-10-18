@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T> {
+public class AppApiResponse<T> {
 
     // Use enum for better type safety and predefined statuses
     public enum Status {
@@ -38,7 +38,7 @@ public class ApiResponse<T> {
     private LocalDateTime timestamp;
 
     // Private constructor to enforce use of factory methods
-    private ApiResponse(String status, String message, T data, Object metadata) {
+    private AppApiResponse(String status, String message, T data, Object metadata) {
         this.status = status;
         this.message = message;
         this.data = data;
@@ -47,32 +47,32 @@ public class ApiResponse<T> {
     }
 
     // Enhanced factory methods with better overloading
-    public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(Status.SUCCESS.getValue(), "Operation completed successfully", data, null);
+    public static <T> AppApiResponse<T> success(T data) {
+        return new AppApiResponse<>(Status.SUCCESS.getValue(), "Operation completed successfully", data, null);
     }
 
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(Status.SUCCESS.getValue(), message, data, null);
+    public static <T> AppApiResponse<T> success(String message, T data) {
+        return new AppApiResponse<>(Status.SUCCESS.getValue(), message, data, null);
     }
 
-    public static <T> ApiResponse<T> success(String message, T data, Object metadata) {
-        return new ApiResponse<>(Status.SUCCESS.getValue(), message, data, metadata);
+    public static <T> AppApiResponse<T> success(String message, T data, Object metadata) {
+        return new AppApiResponse<>(Status.SUCCESS.getValue(), message, data, metadata);
     }
 
-    public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>(Status.ERROR.getValue(), message, null, null);
+    public static <T> AppApiResponse<T> error(String message) {
+        return new AppApiResponse<>(Status.ERROR.getValue(), message, null, null);
     }
 
-    public static <T> ApiResponse<T> error(String message, T data) {
-        return new ApiResponse<>(Status.ERROR.getValue(), message, data, null);
+    public static <T> AppApiResponse<T> error(String message, T data) {
+        return new AppApiResponse<>(Status.ERROR.getValue(), message, data, null);
     }
 
-    public static <T> ApiResponse<T> error(String message, T data, Object metadata) {
-        return new ApiResponse<>(Status.ERROR.getValue(), message, data, metadata);
+    public static <T> AppApiResponse<T> error(String message, T data, Object metadata) {
+        return new AppApiResponse<>(Status.ERROR.getValue(), message, data, metadata);
     }
 
-    public static <T> ApiResponse<T> warning(String message, T data) {
-        return new ApiResponse<>(Status.WARNING.getValue(), message, data, null);
+    public static <T> AppApiResponse<T> warning(String message, T data) {
+        return new AppApiResponse<>(Status.WARNING.getValue(), message, data, null);
     }
 
     // Builder pattern for complex construction (optional enhancement)
@@ -111,8 +111,8 @@ public class ApiResponse<T> {
             return this;
         }
 
-        public ApiResponse<T> build() {
-            return new ApiResponse<>(
+        public AppApiResponse<T> build() {
+            return new AppApiResponse<>(
                     Objects.requireNonNull(status, "Status cannot be null"),
                     Objects.requireNonNull(message, "Message cannot be null"),
                     data,
@@ -139,7 +139,7 @@ public class ApiResponse<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ApiResponse<?> that = (ApiResponse<?>) o;
+        AppApiResponse<?> that = (AppApiResponse<?>) o;
         return Objects.equals(status, that.status) &&
                 Objects.equals(message, that.message) &&
                 Objects.equals(data, that.data) &&

@@ -5,7 +5,7 @@ import com.financial.api.dto.request.RegisterRequest;
 import com.financial.api.dto.request.RefreshTokenRequest;
 import com.financial.api.dto.response.AuthResponse;
 import com.financial.api.service.AuthService;
-import com.financial.api.util.ApiResponse;
+import com.financial.api.util.AppApiResponse;
 import com.financial.api.util.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -36,13 +36,13 @@ public class AuthController {
             description = "Create a new user account. Returns JWT tokens in HTTP-only cookies."
     )
     @SecurityRequirement(name = "") // No authentication required
-    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AppApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse authResponse = authService.register(request);
 
         String accessTokenCookie = cookieUtil.createAccessTokenCookie(authResponse.getAccessToken());
         String refreshTokenCookie = cookieUtil.createRefreshTokenCookie(authResponse.getRefreshToken());
 
-        ApiResponse<String> response = ApiResponse.success("Register successful", null);
+        AppApiResponse<String> response = AppApiResponse.success("Register successful", null);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie)
@@ -56,13 +56,13 @@ public class AuthController {
             description = "Authenticate user and return JWT tokens in HTTP-only cookies."
     )
     @SecurityRequirement(name = "") // No authentication required
-    public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AppApiResponse<String>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse authResponse = authService.login(request);
 
         String accessTokenCookie = cookieUtil.createAccessTokenCookie(authResponse.getAccessToken());
         String refreshTokenCookie = cookieUtil.createRefreshTokenCookie(authResponse.getRefreshToken());
 
-        ApiResponse<String> response = ApiResponse.success("Login successful", null);
+        AppApiResponse<String> response = AppApiResponse.success("Login successful", null);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie)
@@ -75,7 +75,7 @@ public class AuthController {
             summary = "Refresh access token (Web)",
             description = "Get a new access token using the refresh token from cookie."
     )
-    public ResponseEntity<ApiResponse<String>> refreshToken(
+    public ResponseEntity<AppApiResponse<String>> refreshToken(
             @CookieValue(name = REFRESH_TOKEN, required = false) String refreshToken) {
 
         if (refreshToken == null || refreshToken.isEmpty()) {
@@ -87,7 +87,7 @@ public class AuthController {
         AuthResponse authResponse = authService.refreshToken(request);
 
         String accessTokenCookie = cookieUtil.createAccessTokenCookie(authResponse.getAccessToken());
-        ApiResponse<String> response = ApiResponse.success("Token refreshed successfully", null);
+        AppApiResponse<String> response = AppApiResponse.success("Token refreshed successfully", null);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie)
@@ -99,11 +99,11 @@ public class AuthController {
             summary = "Logout user (Web)",
             description = "Clear authentication cookies."
     )
-    public ResponseEntity<ApiResponse<String>> logout() {
+    public ResponseEntity<AppApiResponse<String>> logout() {
         String deleteAccessToken = cookieUtil.deleteAccessTokenCookie();
         String deleteRefreshToken = cookieUtil.deleteRefreshTokenCookie();
 
-        ApiResponse<String> response = ApiResponse.success("Logout successful", null);
+        AppApiResponse<String> response = AppApiResponse.success("Logout successful", null);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteAccessToken)
@@ -119,9 +119,9 @@ public class AuthController {
             description = "Create a new user account. Returns JWT tokens in response body."
     )
     @SecurityRequirement(name = "") // No authentication required
-    public ResponseEntity<ApiResponse<AuthResponse>> mobileRegister(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AppApiResponse<AuthResponse>> mobileRegister(@Valid @RequestBody RegisterRequest request) {
         AuthResponse registered = authService.register(request);
-        ApiResponse<AuthResponse> response = ApiResponse.success(
+        AppApiResponse<AuthResponse> response = AppApiResponse.success(
                 "Register successfully",
                 registered
         );
@@ -134,9 +134,9 @@ public class AuthController {
             description = "Authenticate user and return JWT tokens in response body."
     )
     @SecurityRequirement(name = "") // No authentication required
-    public ResponseEntity<ApiResponse<AuthResponse>> mobileLogin(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AppApiResponse<AuthResponse>> mobileLogin(@Valid @RequestBody LoginRequest request) {
         AuthResponse login = authService.login(request);
-        ApiResponse<AuthResponse> response = ApiResponse.success(
+        AppApiResponse<AuthResponse> response = AppApiResponse.success(
                 "Login successfully",
                 login
         );
@@ -149,9 +149,9 @@ public class AuthController {
             description = "Get a new access token using the refresh token from request body."
     )
     @SecurityRequirement(name = BEARER_AUTH)
-    public ResponseEntity<ApiResponse<AuthResponse>> mobileRefreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<AppApiResponse<AuthResponse>> mobileRefreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         AuthResponse refreshToken = authService.refreshToken(request);
-        ApiResponse<AuthResponse> response = ApiResponse.success(
+        AppApiResponse<AuthResponse> response = AppApiResponse.success(
                 "Token refreshed successfully",
                 refreshToken
         );
@@ -164,9 +164,9 @@ public class AuthController {
             description = "In stateless JWT, logout is handled client-side by removing the token."
     )
     @SecurityRequirement(name = BEARER_AUTH)
-    public ResponseEntity<ApiResponse<String>> mobileLogout() {
+    public ResponseEntity<AppApiResponse<String>> mobileLogout() {
         // In stateless JWT, logout is handled client-side by removing the token
-        ApiResponse<String> response = ApiResponse.success(
+        AppApiResponse<String> response = AppApiResponse.success(
                 "Logout successfully",
                 null
         );
