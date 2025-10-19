@@ -45,10 +45,10 @@ INSERT INTO accounts (name, description, amount, user_id, category_id, currency_
 -- ========================
 -- Dummy data for transaction types
 -- ========================
-INSERT INTO transaction_types (name, description) VALUES
-('Income', 'Money coming in'),
-('Expense', 'Money going out'),
-('Transfer', 'Money transferred between accounts');
+INSERT INTO transaction_types (name, description, user_id, is_system) VALUES
+('Income', 'Money coming in', 1, FALSE),
+('Expense', 'Money going out', 2, FALSE),
+('Transfer', 'Money transferred between accounts', 1, FALSE);
 
 -- ========================
 -- Dummy data for transactions

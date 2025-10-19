@@ -105,9 +105,12 @@ CREATE TABLE IF NOT EXISTS transaction_types (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
+    user_id BIGINT,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_transaction_type_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create transactions table
@@ -170,7 +173,7 @@ INSERT INTO categories (name, description, user_id, is_system) VALUES
 ('Savings', 'Emergency fund, investments, and savings accounts', NULL, TRUE);
 
 -- Insert default transaction types
-INSERT INTO transaction_types (name, description) VALUES
-('Income', 'Money received'),
-('Expense', 'Money spent'),
-('Transfer', 'Money transferred between accounts');
+INSERT INTO transaction_types (name, description, user_id, is_system) VALUES
+('Income', 'Money received', NULL, TRUE),
+('Expense', 'Money spent', NULL, TRUE),
+('Transfer', 'Money transferred between accounts', NULL, TRUE);
