@@ -22,8 +22,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.financial.api.config.SecurityConstants.ACCESS_TOKEN;
-import static com.financial.api.config.SecurityConstants.PUBLIC_URLS;
+import static com.financial.api.constant.SecurityConstants.ACCESS_TOKEN;
+import static com.financial.api.constant.SecurityConstants.PUBLIC_URLS;
 
 @Slf4j
 @Component

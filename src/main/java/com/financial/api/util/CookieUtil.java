@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
-import static com.financial.api.config.SecurityConstants.ACCESS_TOKEN;
-import static com.financial.api.config.SecurityConstants.REFRESH_TOKEN;
+import static com.financial.api.constant.SecurityConstants.ACCESS_TOKEN;
+import static com.financial.api.constant.SecurityConstants.REFRESH_TOKEN;
 
 import lombok.extern.slf4j.Slf4j;
 

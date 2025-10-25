@@ -1,4 +1,4 @@
-package com.financial.api.config;
+package com.financial.api.constant;
 
 public class SecurityConstants {
     private SecurityConstants() {} // prevent instantiation

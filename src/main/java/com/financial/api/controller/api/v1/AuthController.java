@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.financial.api.config.OpenApiConfig.BEARER_AUTH;
-import static com.financial.api.config.SecurityConstants.REFRESH_TOKEN;
+import static com.financial.api.constant.SecurityConstants.REFRESH_TOKEN;
 
 @RestController
 @RequestMapping("/api/v1/auth")
