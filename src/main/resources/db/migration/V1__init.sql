@@ -148,8 +148,8 @@ CREATE TABLE IF NOT EXISTS otps (
 
 -- Insert default roles
 INSERT INTO roles (name) VALUES
-('USER'),
-('ADMIN');
+('ROLE_USER'),
+('ROLE_ADMIN');
 
 -- Insert default system currencies
 INSERT INTO currencies (currency, currency_code, symbol, user_id, is_system) VALUES

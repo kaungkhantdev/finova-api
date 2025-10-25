@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.financial.api.config.SecurityConstants.ROLE_USER;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -52,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setName(request.getName());
         user.setUsername(parse.getUserName());
-        Role role = roleRepository.findByName("USER")
+        Role role = roleRepository.findByName(ROLE_USER)
                 .orElseThrow(() -> new IllegalArgumentException("Role USER not found"));
         user.getRoles().add(role);
 

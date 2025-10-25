@@ -2,7 +2,6 @@ package com.financial.api.dto.mapper;
 
 import com.financial.api.dto.request.TransactionTypeCreateRequest;
 import com.financial.api.dto.request.TransactionTypeUpdateRequest;
-import com.financial.api.dto.response.CategoryResponse;
 import com.financial.api.dto.response.TransactionTypeResponse;
 import com.financial.api.entity.TransactionType;
 import org.springframework.stereotype.Component;

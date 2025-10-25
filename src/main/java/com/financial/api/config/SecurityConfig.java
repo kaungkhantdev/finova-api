@@ -32,7 +32,14 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
-
+    /**
+     * Important Note:
+     * hasRole("USER") automatically adds the "ROLE_" prefix, so it looks for ROLE_USER.
+     * hasAuthority("USER") does NOT add the prefix, so it looks for exactly USER.
+     * @param http
+     * @return
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -40,8 +47,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_URLS).permitAll()
-                        .requestMatchers(ADMIN_URL).hasRole(ROLE_ADMIN)
-                        .requestMatchers(USER_URLS).hasAnyRole(ROLE_USER, ROLE_ADMIN)
+                        .requestMatchers(ADMIN_URL).hasAuthority(ROLE_ADMIN)
+                        .requestMatchers(USER_URLS).hasAnyAuthority(ROLE_USER, ROLE_ADMIN)
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
