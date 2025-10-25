@@ -1,6 +1,7 @@
 package com.financial.api.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,8 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema( description = "Request object for creating a new transaction" )
+@Schema(description = "Request object for creating a new transaction")
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TransactionCreateRequest {
     @NotBlank(message = "Transaction name is required")
     @Size(min = 1, max = 100, message = "Transaction name must be between 1 and 100 characters")
@@ -41,7 +43,6 @@ public class TransactionCreateRequest {
     private BigDecimal amount;
 
     @NotNull(message = "Transaction type ID is required")
-    @JsonProperty("transaction_type_id")
     @Schema(
             description = "Reference ID of the associated transaction type",
             example = "1",
@@ -50,7 +51,6 @@ public class TransactionCreateRequest {
     private Long transactionTypeId;
 
     @NotNull(message = "Account ID is required")
-    @JsonProperty("account_id")
     @Schema(
             description = "Reference ID of the associated account",
             example = "1",
@@ -59,7 +59,6 @@ public class TransactionCreateRequest {
     private Long accountId;
 
     @NotNull(message = "User ID is required")
-    @JsonProperty("user_id")
     @Schema(
             description = "Reference ID of the associated user",
             example = "1",
@@ -68,7 +67,6 @@ public class TransactionCreateRequest {
     private Long userId;
 
     @NotNull(message = "Category ID is required")
-    @JsonProperty("category_id")
     @Schema(
             description = "Reference ID of the associated category",
             example = "2",
