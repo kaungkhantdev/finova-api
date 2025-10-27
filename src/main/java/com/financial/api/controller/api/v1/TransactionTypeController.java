@@ -56,22 +56,22 @@ public class TransactionTypeController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
-    @Operation(
-            summary = "Create a new category",
-            description = "Create a new category in the system. Requires authentication via Cookie (web) or Bearer token (mobile)."
-    )
-    public ResponseEntity<AppApiResponse<TransactionTypeResponse>> createTransactionType(
-            @Valid @RequestBody TransactionTypeCreateRequest request
-    ) {
-        TransactionTypeResponse createdTransactionType = transactionTypeService.createTransactionType(request);
-        AppApiResponse<TransactionTypeResponse> response = AppApiResponse.success(
-                "TransactionType created successfully",
-                createdTransactionType
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//    @PostMapping
+//    @Operation(
+//            summary = "Create a new category",
+//            description = "Create a new category in the system. Requires authentication via Cookie (web) or Bearer token (mobile)."
+//    )
+//    public ResponseEntity<AppApiResponse<TransactionTypeResponse>> createTransactionType(
+//            @Valid @RequestBody TransactionTypeCreateRequest request
+//    ) {
+//        TransactionTypeResponse createdTransactionType = transactionTypeService.createTransactionType(request);
+//        AppApiResponse<TransactionTypeResponse> response = AppApiResponse.success(
+//                "TransactionType created successfully",
+//                createdTransactionType
+//        );
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
     @GetMapping("/{id}")
     @Operation(
@@ -84,26 +84,26 @@ public class TransactionTypeController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
-    @Operation(
-            summary = "Update category",
-            description = "Update an existing category. Requires authentication via Cookie (web) or Bearer token (mobile)."
-    )
-    public ResponseEntity<AppApiResponse<TransactionTypeResponse>> updateTransactionType(
-            @PathVariable Long id,
-            @Valid @RequestBody TransactionTypeUpdateRequest request) {
-
-        TransactionTypeResponse category = transactionTypeService.updateTransactionType(id, request);
-        return ResponseEntity.ok(AppApiResponse.success("TransactionType updated successfully", category));
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(
-            summary = "Delete category",
-            description = "Delete a category by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
-    )
-    public ResponseEntity<AppApiResponse<Void>> deleteTransactionType(@PathVariable Long id) {
-        transactionTypeService.deleteTransactionType(id);
-        return ResponseEntity.ok(AppApiResponse.success("TransactionType deleted successfully", null));
-    }
+//    @PutMapping("/{id}")
+//    @Operation(
+//            summary = "Update category",
+//            description = "Update an existing category. Requires authentication via Cookie (web) or Bearer token (mobile)."
+//    )
+//    public ResponseEntity<AppApiResponse<TransactionTypeResponse>> updateTransactionType(
+//            @PathVariable Long id,
+//            @Valid @RequestBody TransactionTypeUpdateRequest request) {
+//
+//        TransactionTypeResponse category = transactionTypeService.updateTransactionType(id, request);
+//        return ResponseEntity.ok(AppApiResponse.success("TransactionType updated successfully", category));
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    @Operation(
+//            summary = "Delete category",
+//            description = "Delete a category by ID. Requires authentication via Cookie (web) or Bearer token (mobile)."
+//    )
+//    public ResponseEntity<AppApiResponse<Void>> deleteTransactionType(@PathVariable Long id) {
+//        transactionTypeService.deleteTransactionType(id);
+//        return ResponseEntity.ok(AppApiResponse.success("TransactionType deleted successfully", null));
+//    }
 }

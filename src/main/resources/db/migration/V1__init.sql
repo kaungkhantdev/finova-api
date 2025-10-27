@@ -174,6 +174,6 @@ INSERT INTO categories (name, description, user_id, is_system) VALUES
 
 -- Insert default transaction types
 INSERT INTO transaction_types (name, description, user_id, is_system) VALUES
-('Income', 'Money received', NULL, TRUE),
-('Expense', 'Money spent', NULL, TRUE),
-('Transfer', 'Money transferred between accounts', NULL, TRUE);
+('INCOME', 'Money received', NULL, TRUE),
+('EXPENSE', 'Money spent', NULL, TRUE),
+('TRANSFER', 'Money transferred between accounts', NULL, TRUE);

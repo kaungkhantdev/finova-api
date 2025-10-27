@@ -5,6 +5,7 @@ import com.financial.api.dto.request.TransactionCreateRequest;
 import com.financial.api.dto.request.TransactionUpdateRequest;
 import com.financial.api.dto.response.TransactionResponse;
 import com.financial.api.entity.*;
+import com.financial.api.exception.InsufficientBalanceException;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CategoryRepository;
 import com.financial.api.repository.TransactionRepository;
@@ -13,13 +14,22 @@ import com.financial.api.service.TransactionService;
 import com.financial.api.util.AuthenticationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
+import static com.financial.api.constant.TransactionConstants.EXPENSE_TYPE;
+import static com.financial.api.constant.TransactionConstants.INCOME_TYPE;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
+
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final TransactionTypeRepository transactionTypeRepository;
@@ -27,88 +37,215 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
     private final AuthenticationUtil authenticationUtil;
 
+    @Transactional(readOnly = true)
     @Override
     public Page<TransactionResponse> getAll(Pageable pageable) {
         User currentUser = getCurrentUser();
+        log.debug("Fetching all transactions for user: {}", currentUser.getId());
 
-        // Get system + user's own
         Page<Transaction> transactions = transactionRepository.findAll(pageable);
-
         return transactions.map(transactionMapper::toResponse);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public TransactionResponse getTransactionById(Long id) {
+        log.debug("Fetching transaction with ID: {}", id);
+        Transaction transaction = findTransactionById(id);
+        return transactionMapper.toResponse(transaction);
+    }
+
+    @Transactional
     @Override
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
-        User currentUser =  getCurrentUser();
+        log.info("Creating new transaction for amount: {}", request.getAmount());
+
+        validatePositiveAmount(request.getAmount());
+
+        User currentUser = getCurrentUser();
         Category category = getCategory(request.getCategoryId());
         Account account = getAccount(request.getAccountId());
         TransactionType transactionType = getTransactionType(request.getTransactionTypeId());
 
+        processAccountBalance(account, transactionType, request.getAmount());
 
-        Transaction transaction = transactionMapper.toEntity(request, currentUser, transactionType, account, category);
-        Transaction savedCategory = transactionRepository.save(transaction);
-        return transactionMapper.toResponse(savedCategory);
+        Transaction transaction = transactionMapper.toEntity(
+                request, currentUser, transactionType, account, category
+        );
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        log.info("Transaction created successfully with ID: {}", savedTransaction.getId());
+        return transactionMapper.toResponse(savedTransaction);
     }
 
+    @Transactional
     @Override
     public TransactionResponse updateTransaction(Long id, TransactionUpdateRequest request) {
-        Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with ID: " + id));
+        log.info("Updating transaction with ID: {}", id);
 
-        Category category = request.getCategoryId() != null ? getCategory(request.getCategoryId()) : null;
-        Account account = request.getAccountId() != null ? getAccount(request.getAccountId()) : null;
-        TransactionType transactionType = request.getTransactionTypeId() != null ? getTransactionType(request.getTransactionTypeId()) : null;
+        if (request.getAmount() != null) {
+            validatePositiveAmount(request.getAmount());
+        }
 
-        transactionMapper.updateEntity(request, transaction, transactionType, account, category);
+        Transaction existingTransaction = findTransactionById(id);
 
-        Transaction updatedAccount = transactionRepository.save(transaction);
-        return transactionMapper.toResponse(updatedAccount);
+        // Load optional entities
+        Category newCategory = loadOptionalCategory(request.getCategoryId());
+        Account newAccount = loadOptionalAccount(request.getAccountId());
+        TransactionType newTransactionType = loadOptionalTransactionType(request.getTransactionTypeId());
+
+        // Capture original values
+        Account originalAccount = existingTransaction.getAccount();
+        TransactionType originalType = existingTransaction.getTransactionType();
+        BigDecimal originalAmount = existingTransaction.getAmount();
+
+        // Determine target values (use new if provided, otherwise keep original)
+        Account targetAccount = newAccount != null ? newAccount : originalAccount;
+        TransactionType targetType = newTransactionType != null ? newTransactionType : originalType;
+        BigDecimal targetAmount = request.getAmount() != null ? request.getAmount() : originalAmount;
+
+        // Revert original balance impact
+        revertAccountBalance(originalAccount, originalType, originalAmount);
+
+        // Apply new balance impact
+        processAccountBalance(targetAccount, targetType, targetAmount);
+
+        // Update entity fields
+        transactionMapper.updateEntity(request, existingTransaction, newTransactionType, newAccount, newCategory);
+
+        Transaction updatedTransaction = transactionRepository.save(existingTransaction);
+        log.info("Transaction updated successfully with ID: {}", updatedTransaction.getId());
+
+        return transactionMapper.toResponse(updatedTransaction);
     }
 
-    @Override
-    public TransactionResponse getTransactionById(Long id) {
-        Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with ID: " + id));
-        return transactionMapper.toResponse(transaction);
-    }
-
+    @Transactional
     @Override
     public void deleteTransaction(Long id) {
-        Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with ID: " + id));
+        log.info("Soft deleting transaction with ID: {}", id);
+
+        Transaction transaction = findTransactionById(id);
+
+        // Revert account balance before soft delete
+        revertAccountBalance(
+                transaction.getAccount(),
+                transaction.getTransactionType(),
+                transaction.getAmount()
+        );
+
         transaction.setIsDeleted(true);
         transactionRepository.save(transaction);
+
+        log.info("Transaction soft deleted successfully with ID: {}", id);
     }
 
-    /**
-     * Get the currently authenticated user
-     */
-    private User getCurrentUser() {
-        return authenticationUtil.getCurrentUser();
+    // ==================== Balance Processing Methods ====================
+
+    private void processAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
+        String typeName = transactionType.getName();
+
+        switch (typeName) {
+            case EXPENSE_TYPE:
+                validateSufficientBalance(account, amount);
+                deductFromAccount(account, amount);
+                break;
+            case INCOME_TYPE:
+                creditToAccount(account, amount);
+                break;
+            default:
+                log.warn("Unknown transaction type: {}", typeName);
+        }
     }
 
-    /**
-     * Get the category with id
-     */
+    private void revertAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
+        String typeName = transactionType.getName();
+
+        switch (typeName) {
+            case EXPENSE_TYPE:
+                // Reverting expense = add money back
+                creditToAccount(account, amount);
+                log.debug("Reverted EXPENSE: added {} back to account {}", amount, account.getId());
+                break;
+            case INCOME_TYPE:
+                // Reverting income = remove money (must have sufficient balance)
+                validateSufficientBalance(account, amount);
+                deductFromAccount(account, amount);
+                log.debug("Reverted INCOME: deducted {} from account {}", amount, account.getId());
+                break;
+            default:
+                log.warn("Unknown transaction type for revert: {}", typeName);
+        }
+    }
+
+    private void validateSufficientBalance(Account account, BigDecimal amount) {
+        if (account.getAmount().compareTo(amount) < 0) {
+            log.error("Insufficient balance - Account: {}, Available: {}, Required: {}",
+                    account.getId(), account.getAmount(), amount);
+            throw new InsufficientBalanceException(
+                    String.format("Insufficient balance in account %d. Available: %s, Required: %s",
+                            account.getId(), account.getAmount(), amount)
+            );
+        }
+    }
+
+    private void validatePositiveAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("Invalid amount: {}", amount);
+            throw new IllegalArgumentException("Transaction amount must be greater than zero");
+        }
+    }
+
+    private void deductFromAccount(Account account, BigDecimal amount) {
+        BigDecimal newBalance = account.getAmount().subtract(amount);
+        account.setAmount(newBalance);
+        accountRepository.save(account);
+        log.debug("Deducted {} from account {}. New balance: {}", amount, account.getId(), newBalance);
+    }
+
+    private void creditToAccount(Account account, BigDecimal amount) {
+        BigDecimal newBalance = account.getAmount().add(amount);
+        account.setAmount(newBalance);
+        accountRepository.save(account);
+        log.debug("Credited {} to account {}. New balance: {}", amount, account.getId(), newBalance);
+    }
+
+    // ==================== Entity Retrieval Methods ====================
+
+    private Transaction findTransactionById(Long id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with ID: " + id));
+    }
+
     private Category getCategory(Long categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with ID: " + categoryId));
     }
 
-    /**
-     * Get the account with id
-     */
     private Account getAccount(Long accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new EntityNotFoundException("Account not found with ID: " + accountId));
     }
 
-    /**
-     * Get the transaction type with id
-     */
     private TransactionType getTransactionType(Long transactionTypeId) {
         return transactionTypeRepository.findById(transactionTypeId)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction Type not found with ID: " + transactionTypeId));
     }
 
+    // ==================== Optional Entity Loading Methods ====================
+
+    private Category loadOptionalCategory(Long categoryId) {
+        return categoryId != null ? getCategory(categoryId) : null;
+    }
+
+    private Account loadOptionalAccount(Long accountId) {
+        return accountId != null ? getAccount(accountId) : null;
+    }
+
+    private TransactionType loadOptionalTransactionType(Long transactionTypeId) {
+        return transactionTypeId != null ? getTransactionType(transactionTypeId) : null;
+    }
+
+    private User getCurrentUser() {
+        return authenticationUtil.getCurrentUser();
+    }
 }
