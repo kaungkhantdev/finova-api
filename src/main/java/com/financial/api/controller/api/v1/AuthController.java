@@ -1,5 +1,6 @@
 package com.financial.api.controller.api.v1;
 
+import com.financial.api.dto.request.ForgotPasswordRequest;
 import com.financial.api.dto.request.LoginRequest;
 import com.financial.api.dto.request.RegisterRequest;
 import com.financial.api.dto.request.RefreshTokenRequest;
@@ -110,6 +111,19 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, deleteRefreshToken)
                 .body(response);
     }
+
+    @PostMapping("/forgot-password")
+    @Operation(
+            summary = "Forgot Password (Web)",
+            description = "Sends OTP to the user’s email."
+    )
+    public ResponseEntity<AppApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        AppApiResponse<String> response = AppApiResponse.success("Otp sent successfully", null);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     // ==================== MOBILE ENDPOINTS (Bearer Token) ====================
 

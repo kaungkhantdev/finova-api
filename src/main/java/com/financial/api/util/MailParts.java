@@ -1,10 +1,10 @@
 package com.financial.api.util;
 
-public class EmailParts {
+public class MailParts {
     private final String userName;
     private final String domain;
 
-    public EmailParts(String userName, String domain) {
+    public MailParts(String userName, String domain) {
         this.userName = userName;
         this.domain = domain;
     }

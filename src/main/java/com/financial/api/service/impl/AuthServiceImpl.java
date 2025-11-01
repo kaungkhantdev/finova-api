@@ -1,8 +1,6 @@
 package com.financial.api.service.impl;
 
-import com.financial.api.dto.request.LoginRequest;
-import com.financial.api.dto.request.RegisterRequest;
-import com.financial.api.dto.request.RefreshTokenRequest;
+import com.financial.api.dto.request.*;
 import com.financial.api.dto.response.AuthResponse;
 import com.financial.api.entity.Role;
 import com.financial.api.entity.User;
@@ -10,8 +8,9 @@ import com.financial.api.repository.RoleRepository;
 import com.financial.api.repository.UserRepository;
 import com.financial.api.security.JwtTokenProvider;
 import com.financial.api.service.AuthService;
-import com.financial.api.util.EmailParser;
-import com.financial.api.util.EmailParts;
+import com.financial.api.service.MailService;
+import com.financial.api.util.MailParser;
+import com.financial.api.util.MailParts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 import static com.financial.api.constant.SecurityConstants.ROLE_USER;
 
@@ -35,7 +36,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
-    private final EmailParser emailParser;
+    private final MailParser mailParser;
+    private final MailService mailService;
 
     @Override
     @Transactional
@@ -44,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
             throw new Error("Email already exists");
         }
 
-        EmailParts parse = emailParser.parse(request.getEmail());
+        MailParts parse = mailParser.parse(request.getEmail());
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -118,5 +120,21 @@ public class AuthServiceImpl implements AuthService {
         }
 
         throw new Error("Invalid refresh token");
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+        try {
+            mailService.sendMail(
+                    MailRequest.builder()
+                            .to(request.getEmail())
+                            .subject("Enterprise Email Example")
+                            .templateName("mail/otp")
+                            .variables(Map.of("userName", "Kaung"))
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new Error("Error main send: " + e.getMessage());
+        }
     }
 }

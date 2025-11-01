@@ -166,30 +166,6 @@ FLUSH PRIVILEGES;
 mvn flyway:migrate
 ```
 
-### Option 2: Docker Setup
-```bash
-# Start MySQL container
-docker run --name financial-mysql \
-  -e MYSQL_ROOT_PASSWORD=rootpassword \
-  -e MYSQL_DATABASE=financial_db \
-  -e MYSQL_USER=finapp \
-  -e MYSQL_PASSWORD=finapp123 \
-  -p 3306:3306 \
-  -d mysql:8.0
-
-# Run migrations
-mvn flyway:migrate
-```
-
-### Option 3: Docker Compose
-```bash
-# Start all services
-docker-compose up -d
-
-# Check status
-docker-compose ps
-```
-
 ## 🏃‍♂️ Running the Application
 
 ### Development Mode
