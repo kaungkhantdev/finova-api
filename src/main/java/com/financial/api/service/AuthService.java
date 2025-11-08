@@ -1,9 +1,6 @@
 package com.financial.api.service;
 
-import com.financial.api.dto.request.ForgotPasswordRequest;
-import com.financial.api.dto.request.LoginRequest;
-import com.financial.api.dto.request.RegisterRequest;
-import com.financial.api.dto.request.RefreshTokenRequest;
+import com.financial.api.dto.request.*;
 import com.financial.api.dto.response.AuthResponse;
 
 public interface AuthService {
@@ -11,4 +8,7 @@ public interface AuthService {
     AuthResponse login(LoginRequest request);
     AuthResponse refreshToken(RefreshTokenRequest request);
     void forgotPassword(ForgotPasswordRequest request);
+    boolean verifyOtp(VerifyOtpRequest request);
+    void resetPassword(ResetPasswordRequest request);
+
 }

@@ -132,13 +132,16 @@ CREATE TABLE IF NOT EXISTS transactions (
     CONSTRAINT fk_transactions_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
--- Create otps table
-CREATE TABLE IF NOT EXISTS otps (
+-- Create otp_codes table
+CREATE TABLE IF NOT EXISTS otp_codes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
-    otp VARCHAR(100) NOT NULL,
+    otp_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    attempts INT NOT NULL DEFAULT 0,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 

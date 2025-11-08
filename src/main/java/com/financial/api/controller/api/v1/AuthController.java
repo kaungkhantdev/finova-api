@@ -1,9 +1,6 @@
 package com.financial.api.controller.api.v1;
 
-import com.financial.api.dto.request.ForgotPasswordRequest;
-import com.financial.api.dto.request.LoginRequest;
-import com.financial.api.dto.request.RegisterRequest;
-import com.financial.api.dto.request.RefreshTokenRequest;
+import com.financial.api.dto.request.*;
 import com.financial.api.dto.response.AuthResponse;
 import com.financial.api.service.AuthService;
 import com.financial.api.util.AppApiResponse;
@@ -121,6 +118,28 @@ public class AuthController {
         authService.forgotPassword(request);
         AppApiResponse<String> response = AppApiResponse.success("Otp sent successfully", null);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/verify-otp")
+    @Operation(
+            summary = "Verify OTP for Password Reset",
+            description = "Verify OTP sent to the user’s email before resetting password."
+    )
+    public ResponseEntity<AppApiResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        authService.verifyOtp(request);
+        AppApiResponse<String> response = AppApiResponse.success("OTP verified successfully", null);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(
+            summary = "Reset Password (Web)",
+            description = "Reset the password using OTP and new password."
+    )
+    public ResponseEntity<AppApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        AppApiResponse<String> response = AppApiResponse.success("Password reset successfully", null);
         return ResponseEntity.ok(response);
     }
 
