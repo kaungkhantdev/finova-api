@@ -29,180 +29,160 @@ public class AuthController {
     // ==================== WEB ENDPOINTS (Cookie-based) ====================
 
     @PostMapping("/register")
-    @Operation(
-            summary = "Register a new user (Web)",
-            description = "Create a new user account. Returns JWT tokens in HTTP-only cookies."
-    )
-    @SecurityRequirement(name = "") // No authentication required
+    @Operation(summary = "Register a new user (Web)",
+            description = "Create a new user account. Returns JWT tokens in HTTP-only cookies.")
+    @SecurityRequirement(name = "")
     public ResponseEntity<AppApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse authResponse = authService.register(request);
-
-        String accessTokenCookie = cookieUtil.createAccessTokenCookie(authResponse.getAccessToken());
-        String refreshTokenCookie = cookieUtil.createRefreshTokenCookie(authResponse.getRefreshToken());
-
-        AppApiResponse<String> response = AppApiResponse.success("Register successful", null);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie)
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
-                .body(response);
+        return buildCookieResponse(authResponse, "Register successful");
     }
 
     @PostMapping("/login")
-    @Operation(
-            summary = "Login user (Web)",
-            description = "Authenticate user and return JWT tokens in HTTP-only cookies."
-    )
-    @SecurityRequirement(name = "") // No authentication required
+    @Operation(summary = "Login user (Web)",
+            description = "Authenticate user and return JWT tokens in HTTP-only cookies.")
+    @SecurityRequirement(name = "")
     public ResponseEntity<AppApiResponse<String>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse authResponse = authService.login(request);
-
-        String accessTokenCookie = cookieUtil.createAccessTokenCookie(authResponse.getAccessToken());
-        String refreshTokenCookie = cookieUtil.createRefreshTokenCookie(authResponse.getRefreshToken());
-
-        AppApiResponse<String> response = AppApiResponse.success("Login successful", null);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie)
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie)
-                .body(response);
+        return buildCookieResponse(authResponse, "Login successful");
     }
 
     @PostMapping("/refresh")
-    @Operation(
-            summary = "Refresh access token (Web)",
-            description = "Get a new access token using the refresh token from cookie."
-    )
+    @Operation(summary = "Refresh access token (Web)",
+            description = "Get a new access token using the refresh token from cookie.")
     public ResponseEntity<AppApiResponse<String>> refreshToken(
             @CookieValue(name = REFRESH_TOKEN, required = false) String refreshToken) {
 
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new Error("Refresh token not found in cookie");
-        }
+        validateRefreshToken(refreshToken);
 
         RefreshTokenRequest request = new RefreshTokenRequest();
         request.setRefreshToken(refreshToken);
         AuthResponse authResponse = authService.refreshToken(request);
 
-        String accessTokenCookie = cookieUtil.createAccessTokenCookie(authResponse.getAccessToken());
-        AppApiResponse<String> response = AppApiResponse.success("Token refreshed successfully", null);
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie)
-                .body(response);
+                .header(HttpHeaders.SET_COOKIE, cookieUtil.createAccessTokenCookie(authResponse.getAccessToken()))
+                .body(AppApiResponse.success("Token refreshed successfully", null));
     }
 
     @PostMapping("/logout")
-    @Operation(
-            summary = "Logout user (Web)",
-            description = "Clear authentication cookies."
-    )
+    @Operation(summary = "Logout user (Web)",
+            description = "Clear authentication cookies.")
     public ResponseEntity<AppApiResponse<String>> logout() {
-        String deleteAccessToken = cookieUtil.deleteAccessTokenCookie();
-        String deleteRefreshToken = cookieUtil.deleteRefreshTokenCookie();
-
-        AppApiResponse<String> response = AppApiResponse.success("Logout successful", null);
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, deleteAccessToken)
-                .header(HttpHeaders.SET_COOKIE, deleteRefreshToken)
-                .body(response);
+                .header(HttpHeaders.SET_COOKIE, cookieUtil.deleteAccessTokenCookie())
+                .header(HttpHeaders.SET_COOKIE, cookieUtil.deleteRefreshTokenCookie())
+                .body(AppApiResponse.success("Logout successful", null));
     }
 
     @PostMapping("/forgot-password")
-    @Operation(
-            summary = "Forgot Password (Web)",
-            description = "Sends OTP to the user’s email."
-    )
+    @Operation(summary = "Forgot Password (Web)",
+            description = "Sends OTP to the user's email.")
     public ResponseEntity<AppApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
-        AppApiResponse<String> response = AppApiResponse.success("Otp sent successfully", null);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(AppApiResponse.success("OTP sent successfully", null));
     }
 
     @PostMapping("/verify-otp")
-    @Operation(
-            summary = "Verify OTP for Password Reset",
-            description = "Verify OTP sent to the user’s email before resetting password."
-    )
-    public ResponseEntity<AppApiResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+    @Operation(summary = "Verify OTP for Password Reset",
+            description = "Verify OTP sent to the user's email before resetting password.")
+    public ResponseEntity<AppApiResponse<String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyOtp(request);
-        AppApiResponse<String> response = AppApiResponse.success("OTP verified successfully", null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(AppApiResponse.success("OTP verified successfully", null));
     }
 
     @PostMapping("/reset-password")
-    @Operation(
-            summary = "Reset Password (Web)",
-            description = "Reset the password using OTP and new password."
-    )
-    public ResponseEntity<AppApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+    @Operation(summary = "Reset Password (Web)",
+            description = "Reset the password using OTP and new password.")
+    public ResponseEntity<AppApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
-        AppApiResponse<String> response = AppApiResponse.success("Password reset successfully", null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(AppApiResponse.success("Password reset successfully", null));
     }
-
 
     // ==================== MOBILE ENDPOINTS (Bearer Token) ====================
 
     @PostMapping("/mobile/register")
-    @Operation(
-            summary = "Register a new user (Mobile)",
-            description = "Create a new user account. Returns JWT tokens in response body."
-    )
-    @SecurityRequirement(name = "") // No authentication required
+    @Operation(summary = "Register a new user (Mobile)",
+            description = "Create a new user account. Returns JWT tokens in response body.")
+    @SecurityRequirement(name = "")
     public ResponseEntity<AppApiResponse<AuthResponse>> mobileRegister(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse registered = authService.register(request);
-        AppApiResponse<AuthResponse> response = AppApiResponse.success(
-                "Register successfully",
-                registered
-        );
-        return ResponseEntity.ok(response);
+        AuthResponse authResponse = authService.register(request);
+        return buildMobileResponse(authResponse, "Register successful");
     }
 
     @PostMapping("/mobile/login")
-    @Operation(
-            summary = "Login user (Mobile)",
-            description = "Authenticate user and return JWT tokens in response body."
-    )
-    @SecurityRequirement(name = "") // No authentication required
+    @Operation(summary = "Login user (Mobile)",
+            description = "Authenticate user and return JWT tokens in response body.")
+    @SecurityRequirement(name = "")
     public ResponseEntity<AppApiResponse<AuthResponse>> mobileLogin(@Valid @RequestBody LoginRequest request) {
-        AuthResponse login = authService.login(request);
-        AppApiResponse<AuthResponse> response = AppApiResponse.success(
-                "Login successfully",
-                login
-        );
-        return ResponseEntity.ok(response);
+        AuthResponse authResponse = authService.login(request);
+        return buildMobileResponse(authResponse, "Login successful");
     }
 
     @PostMapping("/mobile/refresh")
-    @Operation(
-            summary = "Refresh access token (Mobile)",
-            description = "Get a new access token using the refresh token from request body."
-    )
+    @Operation(summary = "Refresh access token (Mobile)",
+            description = "Get a new access token using the refresh token from request body.")
     @SecurityRequirement(name = BEARER_AUTH)
     public ResponseEntity<AppApiResponse<AuthResponse>> mobileRefreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        AuthResponse refreshToken = authService.refreshToken(request);
-        AppApiResponse<AuthResponse> response = AppApiResponse.success(
-                "Token refreshed successfully",
-                refreshToken
-        );
-        return ResponseEntity.ok(response);
+        AuthResponse authResponse = authService.refreshToken(request);
+        return buildMobileResponse(authResponse, "Token refreshed successfully");
     }
 
     @PostMapping("/mobile/logout")
-    @Operation(
-            summary = "Logout user (Mobile)",
-            description = "In stateless JWT, logout is handled client-side by removing the token."
-    )
+    @Operation(summary = "Logout user (Mobile)",
+            description = "In stateless JWT, logout is handled client-side by removing the token.")
     @SecurityRequirement(name = BEARER_AUTH)
     public ResponseEntity<AppApiResponse<String>> mobileLogout() {
-        // In stateless JWT, logout is handled client-side by removing the token
-        AppApiResponse<String> response = AppApiResponse.success(
-                "Logout successfully",
-                null
-        );
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(AppApiResponse.success("Logout successful", null));
+    }
+
+    @PostMapping("/mobile/forgot-password")
+    @Operation(summary = "Forgot Password (Mobile)",
+            description = "Sends OTP to the user's email.")
+    public ResponseEntity<AppApiResponse<String>> mobileForgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(AppApiResponse.success("OTP sent successfully", null));
+    }
+
+    @PostMapping("/mobile/verify-otp")
+    @Operation(summary = "Verify OTP for Password Reset (Mobile)",
+            description = "Verify OTP sent to the user's email before resetting password.")
+    public ResponseEntity<AppApiResponse<String>> mobileVerifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        authService.verifyOtp(request);
+        return ResponseEntity.ok(AppApiResponse.success("OTP verified successfully", null));
+    }
+
+    @PostMapping("/mobile/reset-password")
+    @Operation(summary = "Reset Password (Mobile)",
+            description = "Reset the password using OTP and new password.")
+    public ResponseEntity<AppApiResponse<String>> mobileResetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(AppApiResponse.success("Password reset successfully", null));
+    }
+
+    // ==================== PRIVATE HELPER METHODS ====================
+
+    /**
+     * Build response with authentication cookies (for web endpoints)
+     */
+    private ResponseEntity<AppApiResponse<String>> buildCookieResponse(AuthResponse authResponse, String message) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookieUtil.createAccessTokenCookie(authResponse.getAccessToken()))
+                .header(HttpHeaders.SET_COOKIE, cookieUtil.createRefreshTokenCookie(authResponse.getRefreshToken()))
+                .body(AppApiResponse.success(message, null));
+    }
+
+    /**
+     * Build response with authentication data in body (for mobile endpoints)
+     */
+    private ResponseEntity<AppApiResponse<AuthResponse>> buildMobileResponse(AuthResponse authResponse, String message) {
+        return ResponseEntity.ok(AppApiResponse.success(message, authResponse));
+    }
+
+    /**
+     * Validate refresh token from cookie
+     */
+    private void validateRefreshToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new IllegalArgumentException("Refresh token not found in cookie");
+        }
     }
 }
