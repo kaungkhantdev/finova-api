@@ -166,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
 
             log.info("OTP sent to {}", request.getEmail());
         } catch (Exception e) {
-            throw new Error("Error main send: " + e.getMessage());
+            throw new RuntimeException("Failed to send OTP: " + e.getMessage(), e);
         }
     }
 
@@ -197,6 +197,7 @@ public class AuthServiceImpl implements AuthService {
         boolean valid = verifyOtp(
                 new VerifyOtpRequest(request.getEmail(), request.getOtp())
         );
+
         if (!valid) throw new Error("Invalid OTP");
 
         User user = userRepository.findByEmail(request.getEmail())

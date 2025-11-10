@@ -11,8 +11,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
 
 import static com.financial.api.config.OpenApiConfig.BEARER_AUTH;
 import static com.financial.api.constant.SecurityConstants.REFRESH_TOKEN;
@@ -77,16 +80,20 @@ public class AuthController {
     @Operation(summary = "Forgot Password (Web)",
             description = "Sends OTP to the user's email.")
     public ResponseEntity<AppApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        authService.forgotPassword(request);
-        return ResponseEntity.ok(AppApiResponse.success("OTP sent successfully", null));
-    }
-
-    @PostMapping("/verify-otp")
-    @Operation(summary = "Verify OTP for Password Reset",
-            description = "Verify OTP sent to the user's email before resetting password.")
-    public ResponseEntity<AppApiResponse<String>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        authService.verifyOtp(request);
-        return ResponseEntity.ok(AppApiResponse.success("OTP verified successfully", null));
+        try {
+            authService.forgotPassword(request);
+            return ResponseEntity.ok(AppApiResponse.success("OTP sent successfully", null));
+        } catch (NoSuchElementException ex) {
+            // Handle specific exception for user not found
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(AppApiResponse.error(ex.getMessage(), null));
+        } catch (Exception ex) {
+            // Log the full error for debugging
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(AppApiResponse.error(ex.getMessage(), null));
+        }
     }
 
     @PostMapping("/reset-password")
@@ -140,14 +147,6 @@ public class AuthController {
     public ResponseEntity<AppApiResponse<String>> mobileForgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
         return ResponseEntity.ok(AppApiResponse.success("OTP sent successfully", null));
-    }
-
-    @PostMapping("/mobile/verify-otp")
-    @Operation(summary = "Verify OTP for Password Reset (Mobile)",
-            description = "Verify OTP sent to the user's email before resetting password.")
-    public ResponseEntity<AppApiResponse<String>> mobileVerifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        authService.verifyOtp(request);
-        return ResponseEntity.ok(AppApiResponse.success("OTP verified successfully", null));
     }
 
     @PostMapping("/mobile/reset-password")

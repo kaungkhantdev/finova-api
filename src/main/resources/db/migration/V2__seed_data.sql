@@ -70,11 +70,3 @@ INSERT INTO transactions (name, description, amount, transaction_type_id, accoun
 -- Admin's transactions
 ('Admin Bonus', 'Admin yearly bonus', 1000.00, 1, 5, 3, 1), -- System category: Salary
 ('Restaurant Dinner', 'Team dinner expense', 200.00, 2, 5, 3, 2); -- System category: Food & Dining
-
--- ========================
--- Dummy data for OTPs
--- ========================
-INSERT INTO otps (email, otp) VALUES
-('john.doe@example.com', '123456'),
-('jane.smith@example.com', '654321'),
-('admin@example.com', '000000');
