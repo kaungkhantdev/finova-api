@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static com.financial.api.config.OpenApiConfig.BEARER_AUTH;
@@ -96,6 +97,14 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/verify-otp")
+    @Operation(summary = "Verify OTP for Password Reset",
+            description = "Verify OTP sent to the user's email before resetting password.")
+    public ResponseEntity<AppApiResponse<Map<String, Object>>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        Map<String, Object> token = authService.verifyOtp(request);
+        return ResponseEntity.ok(AppApiResponse.success("OTP verified successfully", token));
+    }
+
     @PostMapping("/reset-password")
     @Operation(summary = "Reset Password (Web)",
             description = "Reset the password using OTP and new password.")
@@ -147,6 +156,14 @@ public class AuthController {
     public ResponseEntity<AppApiResponse<String>> mobileForgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
         return ResponseEntity.ok(AppApiResponse.success("OTP sent successfully", null));
+    }
+
+    @PostMapping("/mobile/verify-otp")
+    @Operation(summary = "Verify OTP for Password Reset (Mobile)",
+            description = "Verify OTP sent to the user's email before resetting password.")
+    public ResponseEntity<AppApiResponse<String>> mobileVerifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        authService.verifyOtp(request);
+        return ResponseEntity.ok(AppApiResponse.success("OTP verified successfully", null));
     }
 
     @PostMapping("/mobile/reset-password")

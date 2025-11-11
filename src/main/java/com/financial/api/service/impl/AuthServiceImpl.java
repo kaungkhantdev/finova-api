@@ -16,6 +16,7 @@ import com.financial.api.util.MailParser;
 import com.financial.api.util.MailParts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,12 +25,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
-import static com.financial.api.constant.OtpConstants.MAX_ATTEMPTS;
-import static com.financial.api.constant.OtpConstants.OTP_EXPIRY_MINUTES;
+import static com.financial.api.constant.OtpConstants.*;
 import static com.financial.api.constant.SecurityConstants.ROLE_USER;
 
 @Slf4j
@@ -47,6 +50,9 @@ public class AuthServiceImpl implements AuthService {
     private final MailParser mailParser;
     private final MailService mailService;
     private final GenerateOtp generateOtp;
+
+    @Value("${jwt.reset_expiration}")
+    private int resetExpirationInMs;
 
     @Override
     @Transactional
@@ -138,15 +144,36 @@ public class AuthServiceImpl implements AuthService {
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new NoSuchElementException("User not found with Email: " + request.getEmail()));
 
+            // Check for recent OTP requests (rate limiting)
+            Optional<OtpCode> recentOtp = otpCodeRepository
+                    .findTopByEmailAndUsedFalseOrderByCreatedAtDesc(request.getEmail());
+
+            if (recentOtp.isPresent()) {
+                OtpCode existingOtp = recentOtp.get();
+                long secondsAgo = Duration.between(existingOtp.getCreatedAt(), LocalDateTime.now()).getSeconds();
+
+                if (secondsAgo < MIN_RESEND_INTERVAL_SECONDS) {
+                    long waitSeconds = MIN_RESEND_INTERVAL_SECONDS - secondsAgo;
+                    throw new IllegalStateException("Please wait " + waitSeconds + " seconds before requesting a new OTP");
+                }
+
+                // Mark old OTP as used
+                existingOtp.setUsed(true);
+                otpCodeRepository.save(existingOtp);
+            }
+
+            // Generate new OTP
             String otp = generateOtp.generateSecureOtp();
             String otpHash = passwordEncoder.encode(otp);
 
             OtpCode otpCode = new OtpCode();
             otpCode.setEmail(request.getEmail());
             otpCode.setOtpHash(otpHash);
+            otpCode.setCreatedAt(LocalDateTime.now()); // IMPORTANT: Add this
             otpCode.setExpiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
             otpCode.setUsed(false);
             otpCode.setAttempts(0);
+            otpCode.setLockedUntil(null); // Reset lock
 
             otpCodeRepository.save(otpCode);
 
@@ -166,46 +193,98 @@ public class AuthServiceImpl implements AuthService {
 
             log.info("OTP sent to {}", request.getEmail());
         } catch (Exception e) {
+            log.error("Failed to send OTP: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to send OTP: " + e.getMessage(), e);
         }
     }
 
     @Override
     @Transactional
-    public boolean verifyOtp(VerifyOtpRequest request) {
+    public Map<String, Object> verifyOtp(VerifyOtpRequest request) {
         OtpCode otpCode = otpCodeRepository.findTopByEmailAndUsedFalseOrderByCreatedAtDesc(request.getEmail())
-                .orElseThrow(() -> new NoSuchElementException("Otp Code not found with Email: " + request.getEmail()));
+                .orElseThrow(() -> new NoSuchElementException("No OTP found. Please request a new one."));
 
-        if (otpCode.isUsed()) throw new Error("OTP already used.");
-        if (otpCode.getExpiresAt().isBefore(LocalDateTime.now())) throw new Error("OTP expired.");
-        if (otpCode.getAttempts() >= MAX_ATTEMPTS) throw new Error("Maximum attempts exceeded");
+        // Check if locked FIRST
+        if (otpCode.getLockedUntil() != null &&
+                otpCode.getLockedUntil().isAfter(LocalDateTime.now())) {
+            long minutesLeft = Duration.between(LocalDateTime.now(), otpCode.getLockedUntil()).toMinutes() + 1;
+            throw new IllegalStateException(
+                    "Too many failed attempts. Please wait " + minutesLeft + " minutes or request a new OTP."
+            );
+        }
 
+        // Check if used
+        if (otpCode.isUsed()) {
+            throw new IllegalStateException("OTP already used. Please request a new one.");
+        }
+
+        // Check if expired
+        if (otpCode.getExpiresAt().isBefore(LocalDateTime.now())) {
+            otpCode.setUsed(true);
+            otpCodeRepository.save(otpCode);
+            throw new IllegalStateException("OTP expired. Please request a new one.");
+        }
+
+        // Check max attempts
+        if (otpCode.getAttempts() >= MAX_ATTEMPTS) {
+            otpCode.setLockedUntil(LocalDateTime.now().plusMinutes(LOCKOUT_DURATION_MINUTES));
+            otpCode.setUsed(true); // Also mark as used
+            otpCodeRepository.save(otpCode);
+            throw new IllegalStateException(
+                    "Maximum attempts exceeded. Your OTP is locked for " + LOCKOUT_DURATION_MINUTES +
+                            " minutes. Please request a new OTP."
+            );
+        }
+
+        // Verify OTP
         boolean valid = passwordEncoder.matches(request.getOtp(), otpCode.getOtpHash());
         otpCode.setAttempts(otpCode.getAttempts() + 1);
 
-        if (valid) {
-            otpCode.setUsed(true);
+        if (!valid) {
+            otpCodeRepository.save(otpCode);
+            int remainingAttempts = MAX_ATTEMPTS - otpCode.getAttempts();
+            throw new IllegalArgumentException(
+                    "Invalid OTP. " + remainingAttempts + " attempt(s) remaining."
+            );
         }
 
+        // Mark as used and save
+        otpCode.setUsed(true);
         otpCodeRepository.save(otpCode);
-        return valid;
+
+        // Generate reset token
+        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+        String resetToken = jwtTokenProvider.generateResetToken(userDetails);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("reset_token", resetToken);
+        response.put("expire_in", resetExpirationInMs + " ms");
+
+        log.info("OTP verified successfully for {}", request.getEmail());
+        return response;
     }
 
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
-        boolean valid = verifyOtp(
-                new VerifyOtpRequest(request.getEmail(), request.getOtp())
-        );
+        String userEmail = jwtTokenProvider.extractUsername(request.getResetToken());
 
-        if (!valid) throw new Error("Invalid OTP");
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("Invalid reset token");
+        }
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new Error("User not found"));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+        if (!jwtTokenProvider.isTokenValid(request.getResetToken(), userDetails)) {
+            throw new IllegalArgumentException("Invalid or expired reset token");
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        log.info("Password reset successful for {}", request.getEmail());
+        log.info("Password reset successful for {}", userEmail);
     }
 }

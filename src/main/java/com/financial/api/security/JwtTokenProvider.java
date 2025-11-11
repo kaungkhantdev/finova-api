@@ -24,6 +24,9 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private int jwtExpirationInMs;
 
+    @Value("${jwt.reset_expiration}")
+    private int resetExpirationInMs;
+
     @Value("${jwt.refresh_expiration}")
     private int refreshExpirationInMs;
 
@@ -46,6 +49,10 @@ public class JwtTokenProvider {
 
     public String generateRefreshToken(UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, refreshExpirationInMs);
+    }
+
+    public String generateResetToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, resetExpirationInMs);
     }
 
     private String buildToken(

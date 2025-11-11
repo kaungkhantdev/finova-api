@@ -31,4 +31,7 @@ public class OtpCode extends BaseEntity {
 
     @Column(name = "attempts", nullable = false)
     private int attempts = 0;
+
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
 }
