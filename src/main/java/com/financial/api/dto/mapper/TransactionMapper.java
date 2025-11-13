@@ -21,8 +21,8 @@ public class TransactionMapper {
         }
 
         Transaction transaction = new Transaction();
-        transaction.setName(transaction.getName());
-        transaction.setDescription(transaction.getDescription());
+        transaction.setName(request.getName());
+        transaction.setDescription(request.getDescription());
         transaction.setUser(user);
         transaction.setTransactionType(transactionType);
         transaction.setAccount(account);

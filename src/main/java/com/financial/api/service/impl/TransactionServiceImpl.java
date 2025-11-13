@@ -43,7 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
         User currentUser = getCurrentUser();
         log.debug("Fetching all transactions for user: {}", currentUser.getId());
 
-        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        Page<Transaction> transactions = transactionRepository.findByUserAndIsDeletedFalse(currentUser, pageable);
         return transactions.map(transactionMapper::toResponse);
     }
 

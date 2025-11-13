@@ -58,14 +58,6 @@ public class TransactionCreateRequest {
     )
     private Long accountId;
 
-    @NotNull(message = "User ID is required")
-    @Schema(
-            description = "Reference ID of the associated user",
-            example = "1",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private Long userId;
-
     @NotNull(message = "Category ID is required")
     @Schema(
             description = "Reference ID of the associated category",

@@ -3,7 +3,9 @@ package com.financial.api.controller.api.v1;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
+import com.financial.api.dto.response.TransactionResponse;
 import com.financial.api.service.AccountService;
+import com.financial.api.util.ApiPaginationMetadata;
 import com.financial.api.util.AppApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,9 +16,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * REST Controller for managing financial accounts.
@@ -31,6 +38,31 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
 
     private final AccountService accountService;
+
+    @GetMapping
+    @Operation(
+            summary = "Get all transactions",
+            description = "Retrieve paginated list of all transactions. Requires authentication via Cookie (web) or Bearer token (mobile)."
+    )
+    public ResponseEntity<AppApiResponse<List<AccountResponse>>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AccountResponse> transactions = accountService.getAll(pageable);
+        AppApiResponse<List<AccountResponse>> response = AppApiResponse.success(
+                "Get All Transactions Successfully",
+                transactions.getContent(),
+                new ApiPaginationMetadata(
+                        transactions.getNumber(),
+                        transactions.getSize(),
+                        transactions.getTotalPages(),
+                        transactions.getTotalElements()
+                )
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(
             summary = "Create a new account",

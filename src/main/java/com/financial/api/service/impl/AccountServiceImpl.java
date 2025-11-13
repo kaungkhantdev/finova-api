@@ -4,10 +4,8 @@ import com.financial.api.dto.mapper.AccountMapper;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
-import com.financial.api.entity.Account;
-import com.financial.api.entity.Category;
-import com.financial.api.entity.Currency;
-import com.financial.api.entity.User;
+import com.financial.api.dto.response.TransactionResponse;
+import com.financial.api.entity.*;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CategoryRepository;
 import com.financial.api.repository.CurrencyRepository;
@@ -15,6 +13,8 @@ import com.financial.api.service.AccountService;
 import com.financial.api.util.AuthenticationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +27,14 @@ public class AccountServiceImpl implements AccountService {
     private final CategoryRepository categoryRepository;
     private final AccountMapper accountMapper;
     private final AuthenticationUtil authenticationUtil;
+
+    @Override
+    public Page<AccountResponse> getAll(Pageable pageable) {
+        User currentUser = getCurrentUser();
+
+        Page<Account> transactions = accountRepository.findByUserAndIsDeletedFalse(currentUser, pageable);
+        return transactions.map(accountMapper::toResponse);
+    }
 
     @Override
     public AccountResponse createAccount(AccountCreateRequest request) {
