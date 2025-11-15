@@ -56,7 +56,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("all")
     @Operation(
             summary = "Get all categories - no pagination",
             description = "Retrieve paginated list of all categories. Requires authentication via Cookie (web) or Bearer token (mobile)."

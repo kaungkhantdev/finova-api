@@ -63,7 +63,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("all")
     @Operation(
             summary = "Get all transactions - no pagination",
             description = "Retrieve paginated list of all transactions. Requires authentication via Cookie (web) or Bearer token (mobile)."
