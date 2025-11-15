@@ -35,12 +35,12 @@ INSERT INTO currencies (currency, currency_code, symbol, user_id, is_system) VAL
 -- ========================
 -- Dummy data for accounts
 -- ========================
-INSERT INTO accounts (name, description, amount, user_id, category_id, currency_id) VALUES
-('John Checking', 'John\'s main checking account', 1500.00, 1, 1, 1), -- Uses system category (Salary) and system currency (USD)
-('John Crypto Wallet', 'Bitcoin investment account', 0.5, 1, 9, 6), -- Uses system category (Investments) and John's custom currency (BTC)
-('Jane Savings', 'Jane\'s savings account', 3000.00, 2, 1, 2), -- Uses system category (Salary) and system currency (EUR)
-('Jane CAD Account', 'Canadian dollar account', 500.00, 2, 1, 7), -- Uses system category and Jane's custom currency (CAD)
-('Admin Account', 'Admin user account', 5000.00, 3, 2, 1); -- Uses system category (Food & Dining) and system currency (USD)
+INSERT INTO accounts (name, description, amount, user_id, currency_id) VALUES
+('John Checking', 'John\'s main checking account', 1500.00, 1, 1), -- Uses system category (Salary) and system currency (USD)
+('John Crypto Wallet', 'Bitcoin investment account', 0.5, 1, 6), -- Uses system category (Investments) and John's custom currency (BTC)
+('Jane Savings', 'Jane\'s savings account', 3000.00, 2, 2), -- Uses system category (Salary) and system currency (EUR)
+('Jane CAD Account', 'Canadian dollar account', 500.00, 2, 7), -- Uses system category and Jane's custom currency (CAD)
+('Admin Account', 'Admin user account', 5000.00, 3, 1); -- Uses system category (Food & Dining) and system currency (USD)
 
 -- ========================
 -- Dummy data for transaction types

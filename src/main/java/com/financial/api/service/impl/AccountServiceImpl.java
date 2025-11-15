@@ -6,7 +6,6 @@ import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
 import com.financial.api.entity.*;
 import com.financial.api.repository.AccountRepository;
-import com.financial.api.repository.CategoryRepository;
 import com.financial.api.repository.CurrencyRepository;
 import com.financial.api.service.AccountService;
 import com.financial.api.util.AuthenticationUtil;
@@ -25,7 +24,6 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final CurrencyRepository currencyRepository;
-    private final CategoryRepository categoryRepository;
     private final AccountMapper accountMapper;
     private final AuthenticationUtil authenticationUtil;
 
@@ -53,10 +51,9 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("You already have an account with name: " + request.getName());
         }
 
-        Category category = getCategory(request.getCategoryId());
         Currency currency = getCurrency(request.getCurrencyId());
 
-        Account account = accountMapper.toEntity(request, currentUser, category, currency);
+        Account account = accountMapper.toEntity(request, currentUser, currency);
         Account savedAccount = accountRepository.save(account);
 
         return accountMapper.toResponse(savedAccount);
@@ -79,10 +76,9 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("You already have an account with name: " + request.getName());
         }
 
-        Category category = request.getCategoryId() != null ? getCategory(request.getCategoryId()) : null;
         Currency currency = request.getCurrencyId() != null ? getCurrency(request.getCurrencyId()) : null;
 
-        accountMapper.updateEntity(request, account, category, currency);
+        accountMapper.updateEntity(request, account, currency);
 
         Account updatedAccount = accountRepository.save(account);
         return accountMapper.toResponse(updatedAccount);
@@ -133,11 +129,4 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new EntityNotFoundException("Currency not found with ID: " + currencyId));
     }
 
-    /**
-     * Get the category with id
-     */
-    private Category getCategory(Long categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with ID: " + categoryId));
-    }
 }

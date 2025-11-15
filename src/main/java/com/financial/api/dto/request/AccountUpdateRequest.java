@@ -40,13 +40,6 @@ public class AccountUpdateRequest {
     )
     private BigDecimal amount;
 
-    @JsonProperty("category_id")
-    @Schema(
-            description = "Updated Category ID reference",
-            example = "3"
-    )
-    private Long categoryId;
-
     @JsonProperty("currency_id")
     @Schema(
             description = "Updated Currency ID reference",

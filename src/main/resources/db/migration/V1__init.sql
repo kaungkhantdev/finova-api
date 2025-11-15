@@ -90,13 +90,11 @@ CREATE TABLE IF NOT EXISTS accounts (
     description TEXT,
     amount DECIMAL(19,2) NOT NULL DEFAULT 0,
     user_id BIGINT,
-    category_id BIGINT,
     currency_id BIGINT,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_accounts_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_accounts_category FOREIGN KEY (category_id) REFERENCES categories(id),
     CONSTRAINT fk_accounts_currency FOREIGN KEY (currency_id) REFERENCES currencies(id)
 );
 

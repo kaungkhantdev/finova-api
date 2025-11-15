@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.user = :user AND LOWER(c.name) = LOWER(:name) AND c.isDeleted = false")
+    @Query("SELECT COUNT(c) > 0 FROM Account c WHERE c.user = :user AND LOWER(c.name) = LOWER(:name) AND c.isDeleted = false")
     boolean existsByUserAndNameIgnoreCaseAndIsDeletedFalse(@Param("user") User user, @Param("name") String name);
 
     @Query("SELECT c FROM Account c WHERE (c.user = :user) AND c.isDeleted = false")

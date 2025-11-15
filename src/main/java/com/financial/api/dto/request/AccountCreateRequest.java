@@ -44,15 +44,6 @@ public class AccountCreateRequest {
     )
     private BigDecimal amount;
 
-    @NotNull(message = "Category ID is required")
-    @JsonProperty("category_id")
-    @Schema(
-            description = "Reference ID of the associated category",
-            example = "2",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private Long categoryId;
-
     @NotNull(message = "Currency ID is required")
     @JsonProperty("currency_id")
     @Schema(

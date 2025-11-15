@@ -4,7 +4,6 @@ import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
 import com.financial.api.entity.Account;
-import com.financial.api.entity.Category;
 import com.financial.api.entity.Currency;
 import com.financial.api.entity.User;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountMapper {
 
-    public Account toEntity(AccountCreateRequest request, User user, Category category, Currency currency) {
+    public Account toEntity(AccountCreateRequest request, User user, Currency currency) {
         if (request == null) {
             return null;
         }
@@ -22,13 +21,12 @@ public class AccountMapper {
         account.setDescription(request.getDescription());
         account.setAmount(request.getAmount());
         account.setUser(user);
-        account.setCategory(category);
         account.setCurrency(currency);
 
         return account;
     }
 
-    public void updateEntity(AccountUpdateRequest request, Account account, Category category, Currency currency) {
+    public void updateEntity(AccountUpdateRequest request, Account account, Currency currency) {
         if (request == null) {
             return;
         }
@@ -36,7 +34,6 @@ public class AccountMapper {
         account.setName(request.getName());
         account.setDescription(request.getDescription());
         account.setAmount(request.getAmount());
-        account.setCategory(category);
         account.setCurrency(currency);
     }
 
@@ -51,8 +48,6 @@ public class AccountMapper {
         response.setDescription(account.getDescription());
         response.setAmount(account.getAmount());
         response.setUserId(account.getUser() != null ? account.getUser().getId() : null);
-        response.setCategoryId(account.getCategory() != null ? account.getCategory().getId() : null);
-        response.setCategoryName(account.getCategory() != null ? account.getCategory().getName() : null);
         response.setCurrencyId(account.getCurrency() != null ? account.getCurrency().getId() : null);
         response.setCurrencyCode(account.getCurrency() != null ? account.getCurrency().getCode() : null);
         response.setCreatedAt(account.getCreatedAt());

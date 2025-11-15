@@ -25,10 +25,6 @@ public class AccountResponse {
 
     private Long userId;
 
-    private Long categoryId;
-
-    private String categoryName;
-
     private Long currencyId;
 
     private String currencyCode;
