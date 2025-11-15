@@ -3,7 +3,6 @@ package com.financial.api.controller.api.v1;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
-import com.financial.api.dto.response.TransactionResponse;
 import com.financial.api.service.AccountService;
 import com.financial.api.util.ApiPaginationMetadata;
 import com.financial.api.util.AppApiResponse;
@@ -63,6 +62,19 @@ public class AccountController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping
+    @Operation(
+            summary = "Get all transactions - no pagination",
+            description = "Retrieve paginated list of all transactions. Requires authentication via Cookie (web) or Bearer token (mobile)."
+    )
+    public ResponseEntity<AppApiResponse<List<AccountResponse>>> getAllNoPagination() {
+        List<AccountResponse> transactions = accountService.getAllNoPagination();
+        AppApiResponse<List<AccountResponse>> response = AppApiResponse.success(transactions);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @Operation(
             summary = "Create a new account",

@@ -8,12 +8,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     /**
      * Find all system currencies or currencies owned by the user (not deleted)
      */
     @Query("SELECT c FROM Category c WHERE (c.user = :user OR c.isSystem = true) AND c.isDeleted = false")
     Page<Category> findByUserOrIsSystemTrueAndIsDeletedFalse(@Param("user") User user, Pageable pageable);
+
+    /**
+     * Find all system currencies or currencies owned by the user (not deleted)
+     */
+    @Query("SELECT c FROM Category c WHERE (c.user = :user OR c.isSystem = true) AND c.isDeleted = false")
+    List<Category> findAllByUserOrIsSystemTrueAndIsDeletedFalse(@Param("user") User user);
 
     /**
      * Check if user already has a category with the given name

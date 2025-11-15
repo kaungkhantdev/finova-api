@@ -56,6 +56,18 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping
+    @Operation(
+            summary = "Get all categories - no pagination",
+            description = "Retrieve paginated list of all categories. Requires authentication via Cookie (web) or Bearer token (mobile)."
+    )
+    public ResponseEntity<AppApiResponse<List<CategoryResponse>>> getAllNoPagination() {
+        List<CategoryResponse> categories = categoryService.getAllNoPagination();
+        AppApiResponse<List<CategoryResponse>> response = AppApiResponse.success(categories);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
     @Operation(
             summary = "Create a new category",

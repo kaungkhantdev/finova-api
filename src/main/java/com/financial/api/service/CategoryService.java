@@ -7,8 +7,11 @@ import com.financial.api.dto.response.CategoryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface CategoryService {
     Page<CategoryResponse> getAll(Pageable pageable);
+    List<CategoryResponse> getAllNoPagination();
     CategoryResponse createCategory(CategoryCreateRequest request);
     CategoryResponse updateCategory(Long id, CategoryUpdateRequest request);
     CategoryResponse getCategoryById(Long id);

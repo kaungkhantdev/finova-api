@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -33,6 +34,13 @@ public class CategoryServiceImpl implements CategoryService {
                 .findByUserOrIsSystemTrueAndIsDeletedFalse(currentUser, pageable);
 
         return categories.map(categoryMapper::toResponse);
+    }
+
+    @Override
+    public List<CategoryResponse> getAllNoPagination() {
+        User currentUser = getCurrentUser();
+        List<Category> categories = categoryRepository.findAllByUserOrIsSystemTrueAndIsDeletedFalse(currentUser);
+        return categories.stream().map(categoryMapper::toResponse).toList();
     }
 
     @Override

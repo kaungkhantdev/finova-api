@@ -4,7 +4,6 @@ import com.financial.api.dto.mapper.AccountMapper;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
-import com.financial.api.dto.response.TransactionResponse;
 import com.financial.api.entity.*;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CategoryRepository;
@@ -17,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,16 @@ public class AccountServiceImpl implements AccountService {
     public Page<AccountResponse> getAll(Pageable pageable) {
         User currentUser = getCurrentUser();
 
-        Page<Account> transactions = accountRepository.findByUserAndIsDeletedFalse(currentUser, pageable);
-        return transactions.map(accountMapper::toResponse);
+        Page<Account> accounts = accountRepository.findByUserAndIsDeletedFalse(currentUser, pageable);
+        return accounts.map(accountMapper::toResponse);
+    }
+
+    @Override
+    public List<AccountResponse> getAllNoPagination() {
+        User currentUser = getCurrentUser();
+
+        List<Account> accounts = accountRepository.findAllByUserAndIsDeletedFalse(currentUser);
+        return accounts.stream().map(accountMapper::toResponse).toList();
     }
 
     @Override
