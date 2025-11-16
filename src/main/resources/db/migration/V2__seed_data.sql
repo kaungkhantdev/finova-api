@@ -43,14 +43,6 @@ INSERT INTO accounts (name, description, amount, user_id, currency_id) VALUES
 ('Admin Account', 'Admin user account', 5000.00, 3, 1); -- Uses system category (Food & Dining) and system currency (USD)
 
 -- ========================
--- Dummy data for transaction types
--- ========================
-INSERT INTO transaction_types (name, description, user_id, is_system) VALUES
-('Income', 'Money coming in', 1, FALSE),
-('Expense', 'Money going out', 2, FALSE),
-('Transfer', 'Money transferred between accounts', 1, FALSE);
-
--- ========================
 -- Dummy data for transactions
 -- ========================
 INSERT INTO transactions (name, description, amount, transaction_type_id, account_id, user_id, category_id) VALUES
@@ -65,7 +57,7 @@ INSERT INTO transactions (name, description, amount, transaction_type_id, accoun
 ('Online Shopping', 'Bought new shoes', 80.00, 2, 3, 2, 3), -- System category: Shopping
 ('Salary Deposit', 'Monthly salary', 2500.00, 1, 3, 2, 1), -- System category: Salary
 ('Pet Vet Visit', 'Annual checkup for dog', 120.00, 2, 3, 2, 13), -- Jane's custom category: Pet Care
-('Transfer to CAD', 'Currency exchange', 200.00, 3, 4, 2, 1), -- Transfer to CAD account
+('Transfer to CAD', 'Currency exchange', 200.00, 1, 4, 2, 1), -- Transfer to CAD account
 
 -- Admin's transactions
 ('Admin Bonus', 'Admin yearly bonus', 1000.00, 1, 5, 3, 1), -- System category: Salary
