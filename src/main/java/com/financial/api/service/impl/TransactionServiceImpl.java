@@ -176,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
     public DailyAmountResponse getDailyAmount(Long transactionTypeId) {
         User currentUser = getCurrentUser();
         DailyAmountProjection data = transactionRepository.getDailyAmount(currentUser.getId(), transactionTypeId);
-        return mapToResponse(data);
+        return mapDailyAmountToResponse(data);
     }
 
 
@@ -184,14 +184,14 @@ public class TransactionServiceImpl implements TransactionService {
     public WeeklyAmountResponse getWeeklyAmount(Long transactionTypeId) {
         User currentUser = getCurrentUser();
         WeeklyAmountProjection data = transactionRepository.getWeeklyAmount(currentUser.getId(), transactionTypeId);
-        return mapWeeklyToResponse(data);
+        return mapWeeklyAmountToResponse(data);
     }
 
     @Override
     public MonthlyAmountResponse getMonthlyAmount(Long transactionTypeId) {
         User currentUser = getCurrentUser();
         MonthlyAmountProjection data = transactionRepository.getMonthlyAmount(currentUser.getId(), transactionTypeId);
-        return mapMonthlyToResponse(data);
+        return mapMonthlyAmountToResponse(data);
     }
 
     @Override
@@ -202,41 +202,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     // ==================== Balance Processing Methods ====================
-    private MonthlyComparisonResponse mapMonthlyComparisonToResponse(MonthlyComparisonProjection data) {
-        if (data == null) {
-            return new MonthlyComparisonResponse(null, null, null, null, null, null);
-        }
-        return new MonthlyComparisonResponse(
-                data.getCurrentIncome(),
-                data.getPreviousIncome(),
-                data.getIncomeChangePercent(),
-                data.getCurrentExpense(),
-                data.getPreviousExpense(),
-                data.getExpenseChangePercent()
-        );
-    }
-
-    private MonthlyAmountResponse mapMonthlyToResponse(MonthlyAmountProjection data) {
-        if (data == null) {
-            return new MonthlyAmountResponse(null, LocalDate.now().getMonthValue());
-        }
-        return new MonthlyAmountResponse(data.getMonthlyAmount(), data.getMonth());
-    }
-
-    private WeeklyAmountResponse mapWeeklyToResponse(WeeklyAmountProjection data) {
-        if (data == null) {
-            return new WeeklyAmountResponse( null, LocalDate.now(), LocalDate.now());
-        }
-        return new WeeklyAmountResponse(data.getWeeklyAmount(), data.getWeekStart(), data.getWeekEnd());
-    }
-
-    private DailyAmountResponse mapToResponse(DailyAmountProjection data) {
-        if (data == null) {
-            return new DailyAmountResponse(null, LocalDate.now());
-        }
-        return new DailyAmountResponse(data.getDailyAmount(), data.getDate());
-    }
-
     private void processAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
         String typeName = transactionType.getName();
 
@@ -325,6 +290,52 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionType getTransactionType(Long transactionTypeId) {
         return transactionTypeRepository.findById(transactionTypeId)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction Type not found with ID: " + transactionTypeId));
+    }
+
+    // ==================== Mapping Methods ================
+    private DailyAmountResponse mapDailyAmountToResponse(DailyAmountProjection data) {
+        if (data == null) {
+            return new DailyAmountResponse(BigDecimal.ZERO, LocalDate.now());
+        }
+        BigDecimal amount = data.getDailyAmount() != null ? data.getDailyAmount() : BigDecimal.ZERO;
+        return new DailyAmountResponse(amount, data.getDate());
+    }
+
+    private WeeklyAmountResponse mapWeeklyAmountToResponse(WeeklyAmountProjection data) {
+        if (data == null) {
+            return new WeeklyAmountResponse(BigDecimal.ZERO, LocalDate.now(), LocalDate.now());
+        }
+        BigDecimal amount = data.getWeeklyAmount() != null ? data.getWeeklyAmount() : BigDecimal.ZERO;
+        return new WeeklyAmountResponse(amount, data.getWeekStart(), data.getWeekEnd());
+    }
+
+    private MonthlyAmountResponse mapMonthlyAmountToResponse(MonthlyAmountProjection data) {
+        if (data == null) {
+            return new MonthlyAmountResponse(BigDecimal.ZERO, LocalDate.now().getMonthValue());
+        }
+        BigDecimal amount = data.getMonthlyAmount() != null ? data.getMonthlyAmount() : BigDecimal.ZERO;
+        return new MonthlyAmountResponse(amount, data.getMonth());
+    }
+
+    private MonthlyComparisonResponse mapMonthlyComparisonToResponse(MonthlyComparisonProjection data) {
+        if (data == null) {
+            return new MonthlyComparisonResponse(
+                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO
+            );
+        }
+        return new MonthlyComparisonResponse(
+                orZero(data.getCurrentIncome()),
+                orZero(data.getPreviousIncome()),
+                orZero(data.getIncomeChangePercent()),
+                orZero(data.getCurrentExpense()),
+                orZero(data.getPreviousExpense()),
+                orZero(data.getExpenseChangePercent())
+        );
+    }
+
+    private BigDecimal orZero(BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
     }
 
     // ==================== Optional Entity Loading Methods ====================

@@ -26,13 +26,6 @@ INSERT INTO categories (name, description, user_id, is_system) VALUES
 ('Pet Care', 'Expenses for pet food and vet visits', 2, FALSE); -- Jane's custom category
 
 -- ========================
--- User-created custom currencies
--- ========================
-INSERT INTO currencies (currency, currency_code, symbol, user_id, is_system) VALUES
-('Bitcoin', 'BTC', '₿', 1, FALSE), -- John's custom currency
-('Canadian Dollar', 'CAD', 'C$', 2, FALSE); -- Jane's custom currency
-
--- ========================
 -- Dummy data for accounts
 -- ========================
 INSERT INTO accounts (name, description, amount, user_id, currency_id) VALUES
