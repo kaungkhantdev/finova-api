@@ -2,11 +2,11 @@ package com.financial.api.service;
 
 import com.financial.api.dto.request.TransactionCreateRequest;
 import com.financial.api.dto.request.TransactionUpdateRequest;
-import com.financial.api.dto.response.TransactionByDateResponse;
-import com.financial.api.dto.response.TransactionByMonthResponse;
-import com.financial.api.dto.response.TransactionResponse;
+import com.financial.api.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface TransactionService {
     Page<TransactionResponse> getAll(Pageable pageable);
@@ -15,7 +15,14 @@ public interface TransactionService {
     TransactionResponse getTransactionById(Long id);
     void deleteTransaction(Long id);
 
-    TransactionByDateResponse getTransactionByDate();
-    TransactionByMonthResponse getTransactionByMonth();
+    List<TransactionByDateResponse> getTransactionByDate();
+    List<TransactionByMonthResponse> getTransactionByMonth();
+    List<TransactionByCategoryResponse> getTransactionByCategory(Long transactionTypeId);
+
+    DailyAmountResponse getDailyAmount(Long transactionTypeId);
+    WeeklyAmountResponse getWeeklyAmount(Long transactionTypeId);
+    MonthlyAmountResponse getMonthlyAmount(Long transactionTypeId);
+
+    MonthlyComparisonResponse getMonthlyComparison();
 
 }

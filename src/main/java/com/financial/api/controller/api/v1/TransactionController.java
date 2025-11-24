@@ -2,7 +2,7 @@ package com.financial.api.controller.api.v1;
 
 import com.financial.api.dto.request.TransactionCreateRequest;
 import com.financial.api.dto.request.TransactionUpdateRequest;
-import com.financial.api.dto.response.TransactionResponse;
+import com.financial.api.dto.response.*;
 import com.financial.api.service.TransactionService;
 import com.financial.api.util.ApiPaginationMetadata;
 import com.financial.api.util.AppApiResponse;
@@ -104,5 +104,85 @@ public class TransactionController {
     public ResponseEntity<AppApiResponse<Void>> deleteTransaction(@PathVariable Long id) {
         transactionService.deleteTransaction(id);
         return ResponseEntity.ok(AppApiResponse.success("Transaction deleted successfully", null));
+    }
+
+
+    // Transaction grouping endpoints
+    @GetMapping("/by-date")
+    public ResponseEntity<AppApiResponse<List<TransactionByDateResponse>>> getTransactionByDate() {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get Transaction By Date successfully",
+                        transactionService.getTransactionByDate()
+                )
+        );
+    }
+
+    @GetMapping("/by-month")
+    public ResponseEntity<AppApiResponse<List<TransactionByMonthResponse>>> getTransactionByMonth() {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get Transaction By Month successfully",
+                        transactionService.getTransactionByMonth()
+                )
+        );
+    }
+
+    @GetMapping("/by-category")
+    public ResponseEntity<AppApiResponse<List<TransactionByCategoryResponse>>> getTransactionByCategory(
+            @RequestParam Long transactionTypeId
+    ) {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get Transaction By Category successfully",
+                        transactionService.getTransactionByCategory(transactionTypeId)
+                )
+        );
+    }
+
+    @GetMapping("/daily-amount")
+    public ResponseEntity<AppApiResponse<DailyAmountResponse>> getDailyAmount(
+            @RequestParam Long transactionTypeId
+    ) {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get DailyAmount successfully",
+                        transactionService.getDailyAmount(transactionTypeId)
+                )
+        );
+    }
+
+    @GetMapping("/weekly-amount")
+    public ResponseEntity<AppApiResponse<WeeklyAmountResponse>> getWeeklyAmount(
+            @RequestParam Long transactionTypeId
+    ) {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get WeeklyAmount successfully",
+                        transactionService.getWeeklyAmount(transactionTypeId)
+                )
+        );
+    }
+
+    @GetMapping("/monthly-amount")
+    public ResponseEntity<AppApiResponse<MonthlyAmountResponse>> getMonthlyAmount(
+            @RequestParam Long transactionTypeId
+    ) {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get MonthlyAmount successfully",
+                        transactionService.getMonthlyAmount(transactionTypeId)
+                )
+        );
+    }
+
+    @GetMapping("/monthly-comparison")
+    public ResponseEntity<AppApiResponse<MonthlyComparisonResponse>> getMonthlyComparison() {
+        return ResponseEntity.ok(
+                AppApiResponse.success(
+                        "Get MonthlyComparison successfully",
+                        transactionService.getMonthlyComparison()
+                )
+        );
     }
 }

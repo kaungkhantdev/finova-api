@@ -3,13 +3,17 @@ package com.financial.api.service.impl;
 import com.financial.api.dto.mapper.TransactionMapper;
 import com.financial.api.dto.request.TransactionCreateRequest;
 import com.financial.api.dto.request.TransactionUpdateRequest;
-import com.financial.api.dto.response.TransactionResponse;
+import com.financial.api.dto.response.*;
 import com.financial.api.entity.*;
 import com.financial.api.exception.InsufficientBalanceException;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CategoryRepository;
 import com.financial.api.repository.TransactionRepository;
 import com.financial.api.repository.TransactionTypeRepository;
+import com.financial.api.repository.projection.DailyAmountProjection;
+import com.financial.api.repository.projection.MonthlyAmountProjection;
+import com.financial.api.repository.projection.MonthlyComparisonProjection;
+import com.financial.api.repository.projection.WeeklyAmountProjection;
 import com.financial.api.service.TransactionService;
 import com.financial.api.util.AuthenticationUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 import static com.financial.api.constant.TransactionConstants.EXPENSE_TYPE;
 import static com.financial.api.constant.TransactionConstants.INCOME_TYPE;
@@ -139,7 +145,97 @@ public class TransactionServiceImpl implements TransactionService {
         log.info("Transaction soft deleted successfully with ID: {}", id);
     }
 
+    @Override
+    public List<TransactionByDateResponse> getTransactionByDate() {
+        User currentUser = getCurrentUser();
+        return transactionRepository.getTransactionByDate(currentUser.getId())
+                .stream()
+                .map(TransactionByDateResponse::new)
+                .toList();
+    }
+
+
+    @Override
+    public List<TransactionByMonthResponse> getTransactionByMonth() {
+        User currentUser = getCurrentUser();
+        return transactionRepository.getTransactionByMonth(currentUser.getId())
+                .stream()
+                .map(TransactionByMonthResponse::new)
+                .toList();
+    }
+
+    @Override
+    public List<TransactionByCategoryResponse> getTransactionByCategory(Long transactionTypeId) {
+        User currentUser = getCurrentUser();
+        return transactionRepository.getTransactionsByCategory(currentUser.getId(), transactionTypeId)
+                .stream()
+                .map(TransactionByCategoryResponse::new)
+                .toList();
+    }
+    @Override
+    public DailyAmountResponse getDailyAmount(Long transactionTypeId) {
+        User currentUser = getCurrentUser();
+        DailyAmountProjection data = transactionRepository.getDailyAmount(currentUser.getId(), transactionTypeId);
+        return mapToResponse(data);
+    }
+
+
+    @Override
+    public WeeklyAmountResponse getWeeklyAmount(Long transactionTypeId) {
+        User currentUser = getCurrentUser();
+        WeeklyAmountProjection data = transactionRepository.getWeeklyAmount(currentUser.getId(), transactionTypeId);
+        return mapWeeklyToResponse(data);
+    }
+
+    @Override
+    public MonthlyAmountResponse getMonthlyAmount(Long transactionTypeId) {
+        User currentUser = getCurrentUser();
+        MonthlyAmountProjection data = transactionRepository.getMonthlyAmount(currentUser.getId(), transactionTypeId);
+        return mapMonthlyToResponse(data);
+    }
+
+    @Override
+    public MonthlyComparisonResponse getMonthlyComparison() {
+        User currentUser = getCurrentUser();
+        MonthlyComparisonProjection data = transactionRepository.getMonthlyComparison(currentUser.getId());
+        return mapMonthlyComparisonToResponse(data);
+    }
+
     // ==================== Balance Processing Methods ====================
+    private MonthlyComparisonResponse mapMonthlyComparisonToResponse(MonthlyComparisonProjection data) {
+        if (data == null) {
+            return new MonthlyComparisonResponse(null, null, null, null, null, null);
+        }
+        return new MonthlyComparisonResponse(
+                data.getCurrentIncome(),
+                data.getPreviousIncome(),
+                data.getIncomeChangePercent(),
+                data.getCurrentExpense(),
+                data.getPreviousExpense(),
+                data.getExpenseChangePercent()
+        );
+    }
+
+    private MonthlyAmountResponse mapMonthlyToResponse(MonthlyAmountProjection data) {
+        if (data == null) {
+            return new MonthlyAmountResponse(null, LocalDate.now().getMonthValue());
+        }
+        return new MonthlyAmountResponse(data.getMonthlyAmount(), data.getMonth());
+    }
+
+    private WeeklyAmountResponse mapWeeklyToResponse(WeeklyAmountProjection data) {
+        if (data == null) {
+            return new WeeklyAmountResponse( null, LocalDate.now(), LocalDate.now());
+        }
+        return new WeeklyAmountResponse(data.getWeeklyAmount(), data.getWeekStart(), data.getWeekEnd());
+    }
+
+    private DailyAmountResponse mapToResponse(DailyAmountProjection data) {
+        if (data == null) {
+            return new DailyAmountResponse(null, LocalDate.now());
+        }
+        return new DailyAmountResponse(data.getDailyAmount(), data.getDate());
+    }
 
     private void processAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
         String typeName = transactionType.getName();
