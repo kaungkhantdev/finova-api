@@ -156,4 +156,19 @@ public class AccountController {
         accountService.deleteAccount(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(
+            summary = "Get your balance",
+            description = "Retrieves all account balance belonging to the authenticated user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Get your balance",
+                    content = @Content(schema = @Schema(implementation = AccountResponse.class))),
+    })
+    @GetMapping("/get-balance")
+    public  ResponseEntity<AppApiResponse<AccountResponse>> getBalance() {
+        AccountResponse account = accountService.getBalance();
+        AppApiResponse<AccountResponse> response = AppApiResponse.success(account);
+        return ResponseEntity.ok(response);
+    }
 }

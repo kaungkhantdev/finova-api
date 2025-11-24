@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
@@ -19,4 +20,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     @Query("SELECT c FROM Account c WHERE (c.user = :user) AND c.isDeleted = false")
     List<Account> findAllByUserAndIsDeletedFalse(@Param("user") User user);
+
+    @Query("SELECT SUM(a.amount) FROM Account a WHERE a.user = :user AND a.isDeleted = false")
+    BigDecimal getCurrentUserBalance(@Param("user") User user);
 }

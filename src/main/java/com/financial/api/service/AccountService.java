@@ -15,4 +15,6 @@ public interface AccountService {
     AccountResponse updateAccount(Long id, AccountUpdateRequest request);
     AccountResponse getAccountById(Long id);
     void deleteAccount(Long id);
+
+    AccountResponse getBalance();
 }

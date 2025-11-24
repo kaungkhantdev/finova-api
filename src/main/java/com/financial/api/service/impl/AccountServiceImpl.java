@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -51,7 +52,7 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("You already have an account with name: " + request.getName());
         }
 
-        Currency currency = getCurrency(request.getCurrencyId());
+        Currency currency = getCurrency(currentUser.getCurrency().getId());
 
         Account account = accountMapper.toEntity(request, currentUser, currency);
         Account savedAccount = accountRepository.save(account);
@@ -76,9 +77,8 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("You already have an account with name: " + request.getName());
         }
 
-        Currency currency = request.getCurrencyId() != null ? getCurrency(request.getCurrencyId()) : null;
 
-        accountMapper.updateEntity(request, account, currency);
+        accountMapper.updateEntity(request, account);
 
         Account updatedAccount = accountRepository.save(account);
         return accountMapper.toResponse(updatedAccount);
@@ -112,6 +112,17 @@ public class AccountServiceImpl implements AccountService {
 
         account.setIsDeleted(true);
         accountRepository.save(account);
+    }
+
+    @Override
+    public AccountResponse getBalance() {
+        User currentUser = getCurrentUser();
+        BigDecimal balance = accountRepository.getCurrentUserBalance(currentUser);
+
+        return AccountResponse.builder()
+                .amount(balance)
+                .userId(currentUser.getId())
+                .build();
     }
 
     /**

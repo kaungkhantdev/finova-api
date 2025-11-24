@@ -26,7 +26,7 @@ public class AccountMapper {
         return account;
     }
 
-    public void updateEntity(AccountUpdateRequest request, Account account, Currency currency) {
+    public void updateEntity(AccountUpdateRequest request, Account account) {
         if (request == null) {
             return;
         }
@@ -34,7 +34,6 @@ public class AccountMapper {
         account.setName(request.getName());
         account.setDescription(request.getDescription());
         account.setAmount(request.getAmount());
-        account.setCurrency(currency);
     }
 
     public AccountResponse toResponse(Account account) {

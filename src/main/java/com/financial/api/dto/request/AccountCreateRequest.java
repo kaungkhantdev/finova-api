@@ -43,13 +43,4 @@ public class AccountCreateRequest {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private BigDecimal amount;
-
-    @NotNull(message = "Currency ID is required")
-    @JsonProperty("currency_id")
-    @Schema(
-            description = "Reference ID of the associated currency",
-            example = "1",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private Long currencyId;
 }
