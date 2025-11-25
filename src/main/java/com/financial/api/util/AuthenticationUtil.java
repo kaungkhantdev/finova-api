@@ -64,6 +64,21 @@ public class AuthenticationUtil {
                 });
     }
 
+    public User getCurrentUserWithCurrency() {
+        String username = getCurrentUsername();
+
+        if (username == null) {
+            log.error("No authenticated user found in security context");
+            throw new IllegalStateException("No authenticated user found");
+        }
+
+        return userRepository.findByEmailWithCurrency(username)
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", username);
+                    return new IllegalStateException("Authenticated user not found in database");
+                });
+    }
+
     /**
      * Gets the current user's username (email).
      *

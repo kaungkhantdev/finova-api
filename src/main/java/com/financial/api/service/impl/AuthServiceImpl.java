@@ -2,9 +2,11 @@ package com.financial.api.service.impl;
 
 import com.financial.api.dto.request.*;
 import com.financial.api.dto.response.AuthResponse;
+import com.financial.api.entity.Currency;
 import com.financial.api.entity.OtpCode;
 import com.financial.api.entity.Role;
 import com.financial.api.entity.User;
+import com.financial.api.repository.CurrencyRepository;
 import com.financial.api.repository.OtpCodeRepository;
 import com.financial.api.repository.RoleRepository;
 import com.financial.api.repository.UserRepository;
@@ -14,6 +16,7 @@ import com.financial.api.service.MailService;
 import com.financial.api.util.GenerateOtp;
 import com.financial.api.util.MailParser;
 import com.financial.api.util.MailParts;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,10 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 import static com.financial.api.constant.OtpConstants.*;
 import static com.financial.api.constant.SecurityConstants.ROLE_USER;
@@ -41,6 +41,7 @@ import static com.financial.api.constant.SecurityConstants.ROLE_USER;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final CurrencyRepository currencyRepository;
     private final RoleRepository roleRepository;
     private final OtpCodeRepository otpCodeRepository;
     private final PasswordEncoder passwordEncoder;
@@ -68,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setName(request.getName());
         user.setUsername(parse.getUserName());
+        user.setCurrency(getCurrency(request.getCurrencyId()));
         Role role = roleRepository.findByName(ROLE_USER)
                 .orElseThrow(() -> new IllegalArgumentException("Role USER not found"));
         user.getRoles().add(role);
@@ -286,5 +288,10 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         log.info("Password reset successful for {}", userEmail);
+    }
+
+    private Currency getCurrency(Long currencyId) {
+        return currencyRepository.findById(currencyId)
+                .orElseThrow(() -> new EntityNotFoundException("Currency not found with ID: " + currencyId));
     }
 }

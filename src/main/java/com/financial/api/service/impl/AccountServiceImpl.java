@@ -4,10 +4,12 @@ import com.financial.api.dto.mapper.AccountMapper;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
+import com.financial.api.dto.response.MultiCurrencyConversionResponse;
 import com.financial.api.entity.*;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CurrencyRepository;
 import com.financial.api.service.AccountService;
+import com.financial.api.service.ExternalApiService;
 import com.financial.api.util.AuthenticationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class AccountServiceImpl implements AccountService {
     private final CurrencyRepository currencyRepository;
     private final AccountMapper accountMapper;
     private final AuthenticationUtil authenticationUtil;
+    private final ExternalApiService externalApiService;
 
     @Override
     public Page<AccountResponse> getAll(Pageable pageable) {
@@ -115,21 +118,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountResponse getBalance() {
+    public MultiCurrencyConversionResponse getBalance() {
         User currentUser = getCurrentUser();
         BigDecimal balance = accountRepository.getCurrentUserBalance(currentUser);
 
-        return AccountResponse.builder()
-                .amount(balance)
-                .userId(currentUser.getId())
-                .build();
+        return externalApiService.convertToMultipleCurrencies(currentUser.getCurrency().getCode(), balance);
     }
 
     /**
      * Get the currently authenticated user
      */
     private User getCurrentUser() {
-        return authenticationUtil.getCurrentUser();
+        return authenticationUtil.getCurrentUserWithCurrency();
     }
 
     /**
