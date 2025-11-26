@@ -5,7 +5,6 @@ import com.financial.api.dto.request.TransactionCreateRequest;
 import com.financial.api.dto.request.TransactionUpdateRequest;
 import com.financial.api.dto.response.*;
 import com.financial.api.entity.*;
-import com.financial.api.exception.InsufficientBalanceException;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CategoryRepository;
 import com.financial.api.repository.TransactionRepository;
@@ -15,6 +14,8 @@ import com.financial.api.repository.projection.MonthlyAmountProjection;
 import com.financial.api.repository.projection.MonthlyComparisonProjection;
 import com.financial.api.repository.projection.WeeklyAmountProjection;
 import com.financial.api.service.TransactionService;
+import com.financial.api.service.strategy.TransactionBalanceStrategyFactory;
+import com.financial.api.service.strategy.TransactionBalanceStrategy;
 import com.financial.api.util.AuthenticationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +29,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.financial.api.constant.TransactionConstants.EXPENSE_TYPE;
-import static com.financial.api.constant.TransactionConstants.INCOME_TYPE;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,6 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final AccountRepository accountRepository;
     private final TransactionMapper transactionMapper;
     private final AuthenticationUtil authenticationUtil;
+    private final TransactionBalanceStrategyFactory strategyFactory;
 
     @Transactional(readOnly = true)
     @Override
@@ -154,7 +153,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .toList();
     }
 
-
     @Override
     public List<TransactionByMonthResponse> getTransactionByMonth() {
         User currentUser = getCurrentUser();
@@ -172,13 +170,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .map(TransactionByCategoryResponse::new)
                 .toList();
     }
+
     @Override
     public DailyAmountResponse getDailyAmount(Long transactionTypeId) {
         User currentUser = getCurrentUser();
         DailyAmountProjection data = transactionRepository.getDailyAmount(currentUser.getId(), transactionTypeId);
         return mapDailyAmountToResponse(data);
     }
-
 
     @Override
     public WeeklyAmountResponse getWeeklyAmount(Long transactionTypeId) {
@@ -201,52 +199,16 @@ public class TransactionServiceImpl implements TransactionService {
         return mapMonthlyComparisonToResponse(data);
     }
 
-    // ==================== Balance Processing Methods ====================
-    private void processAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
-        String typeName = transactionType.getName();
+    // ==================== Balance Processing Methods (Using Strategy) ====================
 
-        switch (typeName) {
-            case EXPENSE_TYPE:
-                validateSufficientBalance(account, amount);
-                deductFromAccount(account, amount);
-                break;
-            case INCOME_TYPE:
-                creditToAccount(account, amount);
-                break;
-            default:
-                log.warn("Unknown transaction type: {}", typeName);
-        }
+    private void processAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
+        TransactionBalanceStrategy strategy = strategyFactory.getStrategy(transactionType.getName());
+        strategy.process(account, amount);
     }
 
     private void revertAccountBalance(Account account, TransactionType transactionType, BigDecimal amount) {
-        String typeName = transactionType.getName();
-
-        switch (typeName) {
-            case EXPENSE_TYPE:
-                // Reverting expense = add money back
-                creditToAccount(account, amount);
-                log.debug("Reverted EXPENSE: added {} back to account {}", amount, account.getId());
-                break;
-            case INCOME_TYPE:
-                // Reverting income = remove money (must have sufficient balance)
-                validateSufficientBalance(account, amount);
-                deductFromAccount(account, amount);
-                log.debug("Reverted INCOME: deducted {} from account {}", amount, account.getId());
-                break;
-            default:
-                log.warn("Unknown transaction type for revert: {}", typeName);
-        }
-    }
-
-    private void validateSufficientBalance(Account account, BigDecimal amount) {
-        if (account.getAmount().compareTo(amount) < 0) {
-            log.error("Insufficient balance - Account: {}, Available: {}, Required: {}",
-                    account.getId(), account.getAmount(), amount);
-            throw new InsufficientBalanceException(
-                    String.format("Insufficient balance in account %d. Available: %s, Required: %s",
-                            account.getId(), account.getAmount(), amount)
-            );
-        }
+        TransactionBalanceStrategy strategy = strategyFactory.getStrategy(transactionType.getName());
+        strategy.revert(account, amount);
     }
 
     private void validatePositiveAmount(BigDecimal amount) {
@@ -254,20 +216,6 @@ public class TransactionServiceImpl implements TransactionService {
             log.error("Invalid amount: {}", amount);
             throw new IllegalArgumentException("Transaction amount must be greater than zero");
         }
-    }
-
-    private void deductFromAccount(Account account, BigDecimal amount) {
-        BigDecimal newBalance = account.getAmount().subtract(amount);
-        account.setAmount(newBalance);
-        accountRepository.save(account);
-        log.debug("Deducted {} from account {}. New balance: {}", amount, account.getId(), newBalance);
-    }
-
-    private void creditToAccount(Account account, BigDecimal amount) {
-        BigDecimal newBalance = account.getAmount().add(amount);
-        account.setAmount(newBalance);
-        accountRepository.save(account);
-        log.debug("Credited {} to account {}. New balance: {}", amount, account.getId(), newBalance);
     }
 
     // ==================== Entity Retrieval Methods ====================
@@ -292,7 +240,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("Transaction Type not found with ID: " + transactionTypeId));
     }
 
-    // ==================== Mapping Methods ================
+    // ==================== Mapping Methods ====================
+
     private DailyAmountResponse mapDailyAmountToResponse(DailyAmountProjection data) {
         if (data == null) {
             return new DailyAmountResponse(BigDecimal.ZERO, LocalDate.now());
