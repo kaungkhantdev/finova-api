@@ -26,7 +26,7 @@ public class TransactionMapper {
         transaction.setTransactionType(transactionType);
         transaction.setAccount(account);
         transaction.setCategory(category);
-
+        transaction.setAmount(request.getAmount());
         return  transaction;
     }
 
@@ -43,6 +43,7 @@ public class TransactionMapper {
         transaction.setTransactionType(transactionType);
         transaction.setAccount(account);
         transaction.setCategory(category);
+        transaction.setAmount(request.getAmount());
     }
 
     public TransactionResponse toResponse(Transaction transaction) {
