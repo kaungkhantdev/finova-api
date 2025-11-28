@@ -12,6 +12,7 @@ import com.financial.api.repository.CurrencyRepository;
 import com.financial.api.service.AccountService;
 import com.financial.api.service.ExternalApiService;
 import com.financial.api.util.AuthenticationUtil;
+import com.financial.api.util.NumberFormatter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -126,7 +130,21 @@ public class AccountServiceImpl implements AccountService {
         MultiCurrencyConversionResponse convertedData = externalApiService.convertToMultipleCurrencies(currentUser.getCurrency().getCode(), balance);
         BalanceResponse response = new BalanceResponse(convertedData);
         response.setFromCurrencySymbol(currentUser.getCurrency().getSymbol());
+        response.setFormattedOriginalAmount(NumberFormatter.format(balance));
+        response.setFormattedConversions(formattedConversions(convertedData.getConversions()));
         return response;
+    }
+
+    /**
+     * Put formatted conversations
+     */
+    private Map<String, String> formattedConversions(Map<String, BigDecimal> conversions) {
+        Map<String, String> formatted = new HashMap<>();
+
+        conversions.forEach((currency, amount) -> {
+            formatted.put(currency, NumberFormatter.format(amount));
+        });
+        return formatted;
     }
 
     /**

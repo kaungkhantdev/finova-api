@@ -6,12 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BalanceResponse extends MultiCurrencyConversionResponse {
     private String fromCurrencySymbol;
+    private String formattedOriginalAmount;
+    private Map<String, String> formattedConversions;
 
     public BalanceResponse(MultiCurrencyConversionResponse base) {
         super(
