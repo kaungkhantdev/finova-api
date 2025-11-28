@@ -4,6 +4,7 @@ import com.financial.api.dto.mapper.AccountMapper;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
+import com.financial.api.dto.response.BalanceResponse;
 import com.financial.api.dto.response.MultiCurrencyConversionResponse;
 import com.financial.api.entity.*;
 import com.financial.api.repository.AccountRepository;
@@ -118,11 +119,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public MultiCurrencyConversionResponse getBalance() {
+    public BalanceResponse getBalance() {
         User currentUser = getCurrentUser();
         BigDecimal balance = accountRepository.getCurrentUserBalance(currentUser);
 
-        return externalApiService.convertToMultipleCurrencies(currentUser.getCurrency().getCode(), balance);
+        MultiCurrencyConversionResponse convertedData = externalApiService.convertToMultipleCurrencies(currentUser.getCurrency().getCode(), balance);
+        BalanceResponse response = new BalanceResponse(convertedData);
+        response.setFromCurrencySymbol(currentUser.getCurrency().getSymbol());
+        return new BalanceResponse(convertedData);
     }
 
     /**

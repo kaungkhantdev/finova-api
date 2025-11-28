@@ -3,7 +3,7 @@ package com.financial.api.service;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
-import com.financial.api.dto.response.MultiCurrencyConversionResponse;
+import com.financial.api.dto.response.BalanceResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,5 +17,5 @@ public interface AccountService {
     AccountResponse getAccountById(Long id);
     void deleteAccount(Long id);
 
-    MultiCurrencyConversionResponse getBalance();
+    BalanceResponse getBalance();
 }
