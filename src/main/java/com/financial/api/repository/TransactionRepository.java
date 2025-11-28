@@ -24,12 +24,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                     FROM transactions
                     WHERE user_id = :userId
                       AND is_deleted = 0
+                      AND created_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
                     GROUP BY DATE(created_at)
                     ORDER BY DATE(created_at)
                     """,
             nativeQuery = true
     )
-    List<TransactionByDateProjection> getTransactionByDate(@Param("userId") Long userId);
+    List<TransactionByDateProjection> getTransactionByDate(@Param("userId") Long userId, @Param("days") Integer days);
 
     @Query(
             value = """

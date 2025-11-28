@@ -112,11 +112,14 @@ public class TransactionController {
             summary = "Get transactions grouped by date",
             description = "Retrieve transactions aggregated by date. Returns transaction totals for each date. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<AppApiResponse<List<TransactionByDateResponse>>> getTransactionByDate() {
+    public ResponseEntity<AppApiResponse<List<TransactionByDateResponse>>> getTransactionByDate(
+            @Parameter(description = "Number of days (e.g., 7, 30, 90)", required = true)
+            @RequestParam(name = "days", defaultValue = "90") Integer days
+    ) {
         return ResponseEntity.ok(
                 AppApiResponse.success(
                         "Get Transaction By Date successfully",
-                        transactionService.getTransactionByDate()
+                        transactionService.getTransactionByDate(days)
                 )
         );
     }
@@ -135,73 +138,23 @@ public class TransactionController {
         );
     }
 
-    @GetMapping("/by-category")
+    @GetMapping("/amount-percentage")
     @Operation(
-            summary = "Get transactions grouped by category",
+            summary = "Get transactions",
             description = "Retrieve transactions aggregated by category for a specific transaction type (income/expense). Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<AppApiResponse<List<TransactionByCategoryResponse>>> getTransactionByCategory(
+    public ResponseEntity<AppApiResponse<AmountPercentageResponse>> getTransactionByCategory(
             @Parameter(description = "Transaction type ID (e.g., 1 for income, 2 for expense)", required = true)
-            @RequestParam(name = "transaction_type_id") Long transactionTypeId
+            @RequestParam(name = "transaction_type_id", defaultValue = "1") Long transactionTypeId
     ) {
         return ResponseEntity.ok(
                 AppApiResponse.success(
                         "Get Transaction By Category successfully",
-                        transactionService.getTransactionByCategory(transactionTypeId)
+                        transactionService.getAmountPercentage(transactionTypeId)
                 )
         );
     }
 
-    @GetMapping("/daily-amount")
-    @Operation(
-            summary = "Get daily transaction amount",
-            description = "Retrieve the total transaction amount for today based on transaction type. Requires authentication via Cookie (web) or Bearer token (mobile)."
-    )
-    public ResponseEntity<AppApiResponse<DailyAmountResponse>> getDailyAmount(
-            @Parameter(description = "Transaction type ID (e.g., 1 for income, 2 for expense)", required = true)
-            @RequestParam(name = "transaction_type_id") Long transactionTypeId
-    ) {
-        return ResponseEntity.ok(
-                AppApiResponse.success(
-                        "Get Daily Amount successfully",
-                        transactionService.getDailyAmount(transactionTypeId)
-                )
-        );
-    }
-
-    @GetMapping("/weekly-amount")
-    @Operation(
-            summary = "Get weekly transaction amount",
-            description = "Retrieve the total transaction amount for this week based on transaction type. Requires authentication via Cookie (web) or Bearer token (mobile)."
-    )
-    public ResponseEntity<AppApiResponse<WeeklyAmountResponse>> getWeeklyAmount(
-            @Parameter(description = "Transaction type ID (e.g., 1 for income, 2 for expense)", required = true)
-            @RequestParam(name = "transaction_type_id") Long transactionTypeId
-    ) {
-        return ResponseEntity.ok(
-                AppApiResponse.success(
-                        "Get Weekly Amount successfully",
-                        transactionService.getWeeklyAmount(transactionTypeId)
-                )
-        );
-    }
-
-    @GetMapping("/monthly-amount")
-    @Operation(
-            summary = "Get monthly transaction amount",
-            description = "Retrieve the total transaction amount for this month based on transaction type. Requires authentication via Cookie (web) or Bearer token (mobile)."
-    )
-    public ResponseEntity<AppApiResponse<MonthlyAmountResponse>> getMonthlyAmount(
-            @Parameter(description = "Transaction type ID (e.g., 1 for income, 2 for expense)", required = true)
-            @RequestParam(name = "transaction_type_id") Long transactionTypeId
-    ) {
-        return ResponseEntity.ok(
-                AppApiResponse.success(
-                        "Get Monthly Amount successfully",
-                        transactionService.getMonthlyAmount(transactionTypeId)
-                )
-        );
-    }
 
     @GetMapping("/monthly-comparison")
     @Operation(

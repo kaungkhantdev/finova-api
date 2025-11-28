@@ -145,9 +145,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionByDateResponse> getTransactionByDate() {
+    public List<TransactionByDateResponse> getTransactionByDate(Integer days) {
         User currentUser = getCurrentUser();
-        return transactionRepository.getTransactionByDate(currentUser.getId())
+        return transactionRepository.getTransactionByDate(currentUser.getId(), days)
                 .stream()
                 .map(TransactionByDateResponse::new)
                 .toList();
@@ -163,33 +163,23 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionByCategoryResponse> getTransactionByCategory(Long transactionTypeId) {
+    public AmountPercentageResponse getAmountPercentage(Long transactionTypeId) {
         User currentUser = getCurrentUser();
-        return transactionRepository.getTransactionsByCategory(currentUser.getId(), transactionTypeId)
+
+        List<TransactionByCategoryResponse> categoryPercentage = transactionRepository.getTransactionsByCategory(currentUser.getId(), transactionTypeId)
                 .stream()
                 .map(TransactionByCategoryResponse::new)
                 .toList();
-    }
+        DailyAmountResponse dailyAmount = mapDailyAmountToResponse(transactionRepository.getDailyAmount(currentUser.getId(), transactionTypeId));
+        WeeklyAmountResponse weeklyAmount = mapWeeklyAmountToResponse(transactionRepository.getWeeklyAmount(currentUser.getId(), transactionTypeId));
+        MonthlyAmountResponse monthlyAmount = mapMonthlyAmountToResponse(transactionRepository.getMonthlyAmount(currentUser.getId(), transactionTypeId));
 
-    @Override
-    public DailyAmountResponse getDailyAmount(Long transactionTypeId) {
-        User currentUser = getCurrentUser();
-        DailyAmountProjection data = transactionRepository.getDailyAmount(currentUser.getId(), transactionTypeId);
-        return mapDailyAmountToResponse(data);
-    }
-
-    @Override
-    public WeeklyAmountResponse getWeeklyAmount(Long transactionTypeId) {
-        User currentUser = getCurrentUser();
-        WeeklyAmountProjection data = transactionRepository.getWeeklyAmount(currentUser.getId(), transactionTypeId);
-        return mapWeeklyAmountToResponse(data);
-    }
-
-    @Override
-    public MonthlyAmountResponse getMonthlyAmount(Long transactionTypeId) {
-        User currentUser = getCurrentUser();
-        MonthlyAmountProjection data = transactionRepository.getMonthlyAmount(currentUser.getId(), transactionTypeId);
-        return mapMonthlyAmountToResponse(data);
+        return new AmountPercentageResponse(
+                categoryPercentage,
+                dailyAmount,
+                weeklyAmount,
+                monthlyAmount
+        );
     }
 
     @Override
@@ -198,6 +188,7 @@ public class TransactionServiceImpl implements TransactionService {
         MonthlyComparisonProjection data = transactionRepository.getMonthlyComparison(currentUser.getId());
         return mapMonthlyComparisonToResponse(data);
     }
+
 
     // ==================== Balance Processing Methods (Using Strategy) ====================
 

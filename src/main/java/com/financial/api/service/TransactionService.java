@@ -15,14 +15,11 @@ public interface TransactionService {
     TransactionResponse getTransactionById(Long id);
     void deleteTransaction(Long id);
 
-    List<TransactionByDateResponse> getTransactionByDate();
+    List<TransactionByDateResponse> getTransactionByDate(Integer days);
     List<TransactionByMonthResponse> getTransactionByMonth();
-    List<TransactionByCategoryResponse> getTransactionByCategory(Long transactionTypeId);
-
-    DailyAmountResponse getDailyAmount(Long transactionTypeId);
-    WeeklyAmountResponse getWeeklyAmount(Long transactionTypeId);
-    MonthlyAmountResponse getMonthlyAmount(Long transactionTypeId);
 
     MonthlyComparisonResponse getMonthlyComparison();
+
+    AmountPercentageResponse getAmountPercentage(Long transactionTypeId);
 
 }
