@@ -3,6 +3,7 @@ package com.financial.api.controller.api.v1;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
+import com.financial.api.dto.response.BalanceResponse;
 import com.financial.api.dto.response.MultiCurrencyConversionResponse;
 import com.financial.api.service.AccountService;
 import com.financial.api.util.ApiPaginationMetadata;
@@ -167,9 +168,9 @@ public class AccountController {
                     content = @Content(schema = @Schema(implementation = AccountResponse.class))),
     })
     @GetMapping("/get-balance")
-    public  ResponseEntity<AppApiResponse<MultiCurrencyConversionResponse>> getBalance() {
-        MultiCurrencyConversionResponse account = accountService.getBalance();
-        AppApiResponse<MultiCurrencyConversionResponse> response = AppApiResponse.success(account);
+    public  ResponseEntity<AppApiResponse<BalanceResponse>> getBalance() {
+        BalanceResponse account = accountService.getBalance();
+        AppApiResponse<BalanceResponse> response = AppApiResponse.success(account);
         return ResponseEntity.ok(response);
     }
 }

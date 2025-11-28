@@ -126,7 +126,7 @@ public class AccountServiceImpl implements AccountService {
         MultiCurrencyConversionResponse convertedData = externalApiService.convertToMultipleCurrencies(currentUser.getCurrency().getCode(), balance);
         BalanceResponse response = new BalanceResponse(convertedData);
         response.setFromCurrencySymbol(currentUser.getCurrency().getSymbol());
-        return new BalanceResponse(convertedData);
+        return response;
     }
 
     /**
