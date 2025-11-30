@@ -108,26 +108,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query(
             value = """
-        SELECT
-            CASE
-                WHEN t.category_id IN (1, 2) THEN c.name
-                ELSE 'Other'
-            END as categoryName,
-            COUNT(*) AS transactionCount,
-            SUM(t.amount) as totalAmount,
-            ROUND(SUM(t.amount) * 100.0 / SUM(SUM(t.amount)) OVER(), 2) as percent
-        FROM transactions t 
-        LEFT JOIN categories c ON t.category_id = c.id
-        WHERE t.user_id = :userId
-          AND t.is_deleted = 0
-          AND t.transaction_type_id = :transactionTypeId
-        GROUP BY
-            CASE 
-                WHEN t.category_id IN (1, 2) THEN c.name
-                ELSE 'Other'
-            END
-        ORDER BY totalAmount DESC
-        """,
+            SELECT
+                CASE
+                    WHEN t.category_id IN (1, 3, 5) THEN c.name
+                    ELSE 'Other'
+                END as categoryName,
+                COUNT(*) AS transactionCount,
+                SUM(t.amount) as totalAmount,
+                ROUND(SUM(t.amount) * 100.0 / SUM(SUM(t.amount)) OVER(), 2) as percent
+            FROM transactions t
+            LEFT JOIN categories c ON t.category_id = c.id
+            WHERE t.user_id = :userId
+              AND t.is_deleted = 0
+              AND t.transaction_type_id = :transactionTypeId
+            GROUP BY
+                CASE
+                    WHEN t.category_id IN (1, 3, 5) THEN c.name
+                    ELSE 'Other'
+                END
+            ORDER BY totalAmount DESC
+            """,
             nativeQuery = true
     )
     List<TransactionByCategoryProjection> getTransactionsByCategory(
@@ -137,32 +137,34 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query(
             value = """
-        SELECT
-            curr.income AS currentIncome,
-            prev.income AS previousIncome,
-            ROUND(((curr.income - prev.income) / NULLIF(prev.income, 0)) * 100, 1) AS incomeChangePercent,
-            curr.expense AS currentExpense,
-            prev.expense AS previousExpense,
-            ROUND(((curr.expense - prev.expense) / NULLIF(prev.expense, 0)) * 100, 1) AS expenseChangePercent
-        FROM (
             SELECT
-                SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS income,
-                SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS expense
-            FROM transactions
-            WHERE user_id = :userId
-              AND is_deleted = 0
-              AND DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
-        ) curr
-        CROSS JOIN (
-            SELECT
-                SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS income,
-                SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS expense
-            FROM transactions
-            WHERE user_id = :userId
-              AND is_deleted = 0
-              AND DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m')
-        ) prev
-        """,
+                curr.income AS currentIncome,
+                prev.income AS previousIncome,
+                (curr.income - prev.income) AS income_difference,
+                ROUND(((curr.income - prev.income) / NULLIF(prev.income, 0)) * 100, 1) AS incomeChangePercent,
+                curr.expense AS currentExpense,
+                prev.expense AS previousExpense,
+                (curr.expense - prev.expense) AS expense_difference,
+                ROUND(((curr.expense - prev.expense) / NULLIF(prev.expense, 0)) * 100, 1) AS expenseChangePercent
+            FROM (
+                SELECT
+                    SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS income,
+                    SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS expense
+                FROM transactions
+                WHERE user_id = :userId
+                  AND is_deleted = 0
+                  AND DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+            ) curr
+            CROSS JOIN (
+                SELECT
+                    SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS income,
+                    SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS expense
+                FROM transactions
+                WHERE user_id = :userId
+                  AND is_deleted = 0
+                  AND DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m')
+            ) prev
+            """,
             nativeQuery = true
     )
     MonthlyComparisonProjection getMonthlyComparison(@Param("userId") Long userId);

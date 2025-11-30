@@ -13,6 +13,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MonthlyAmountResponse {
-    private BigDecimal monthlyAmount;
+    private String monthlyAmount;
     private Integer month;
 }

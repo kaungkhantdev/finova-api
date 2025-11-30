@@ -107,7 +107,7 @@ public class TransactionController {
         return ResponseEntity.ok(AppApiResponse.success("Transaction deleted successfully", null));
     }
 
-    @GetMapping("/by-date")
+    @GetMapping("/get-by-days")
     @Operation(
             summary = "Get transactions grouped by date",
             description = "Retrieve transactions aggregated by date. Returns transaction totals for each date. Requires authentication via Cookie (web) or Bearer token (mobile)."

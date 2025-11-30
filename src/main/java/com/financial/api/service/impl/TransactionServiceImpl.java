@@ -17,6 +17,7 @@ import com.financial.api.service.TransactionService;
 import com.financial.api.service.strategy.TransactionBalanceStrategyFactory;
 import com.financial.api.service.strategy.TransactionBalanceStrategy;
 import com.financial.api.util.AuthenticationUtil;
+import com.financial.api.util.NumberFormatter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -235,42 +236,44 @@ public class TransactionServiceImpl implements TransactionService {
 
     private DailyAmountResponse mapDailyAmountToResponse(DailyAmountProjection data) {
         if (data == null) {
-            return new DailyAmountResponse(BigDecimal.ZERO, LocalDate.now());
+            return new DailyAmountResponse("0", LocalDate.now());
         }
         BigDecimal amount = data.getDailyAmount() != null ? data.getDailyAmount() : BigDecimal.ZERO;
-        return new DailyAmountResponse(amount, data.getDate());
+        return new DailyAmountResponse(NumberFormatter.format(amount), data.getDate());
     }
 
     private WeeklyAmountResponse mapWeeklyAmountToResponse(WeeklyAmountProjection data) {
         if (data == null) {
-            return new WeeklyAmountResponse(BigDecimal.ZERO, LocalDate.now(), LocalDate.now());
+            return new WeeklyAmountResponse("0", LocalDate.now(), LocalDate.now());
         }
         BigDecimal amount = data.getWeeklyAmount() != null ? data.getWeeklyAmount() : BigDecimal.ZERO;
-        return new WeeklyAmountResponse(amount, data.getWeekStart(), data.getWeekEnd());
+        return new WeeklyAmountResponse(NumberFormatter.format(amount), data.getWeekStart(), data.getWeekEnd());
     }
 
     private MonthlyAmountResponse mapMonthlyAmountToResponse(MonthlyAmountProjection data) {
         if (data == null) {
-            return new MonthlyAmountResponse(BigDecimal.ZERO, LocalDate.now().getMonthValue());
+            return new MonthlyAmountResponse("0", LocalDate.now().getMonthValue());
         }
         BigDecimal amount = data.getMonthlyAmount() != null ? data.getMonthlyAmount() : BigDecimal.ZERO;
-        return new MonthlyAmountResponse(amount, data.getMonth());
+        return new MonthlyAmountResponse(NumberFormatter.format(amount), data.getMonth());
     }
 
     private MonthlyComparisonResponse mapMonthlyComparisonToResponse(MonthlyComparisonProjection data) {
         if (data == null) {
             return new MonthlyComparisonResponse(
-                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO
+                    "0", "0", BigDecimal.ZERO, "0",
+                    "0", "0", BigDecimal.ZERO, "0"
             );
         }
         return new MonthlyComparisonResponse(
-                orZero(data.getCurrentIncome()),
-                orZero(data.getPreviousIncome()),
+                NumberFormatter.format(orZero(data.getCurrentIncome())),
+                NumberFormatter.format(orZero(data.getPreviousIncome())),
                 orZero(data.getIncomeChangePercent()),
-                orZero(data.getCurrentExpense()),
-                orZero(data.getPreviousExpense()),
-                orZero(data.getExpenseChangePercent())
+                NumberFormatter.format(orZero(data.getIncomeDifference())),
+                NumberFormatter.format(orZero(data.getCurrentExpense())),
+                NumberFormatter.format(orZero(data.getPreviousExpense())),
+                orZero(data.getExpenseChangePercent()),
+                NumberFormatter.format(orZero(data.getExpenseDifference()))
         );
     }
 

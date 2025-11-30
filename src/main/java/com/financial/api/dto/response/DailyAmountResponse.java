@@ -14,6 +14,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class DailyAmountResponse {
-    private BigDecimal dailyAmount;
+    private String dailyAmount;
     private LocalDate date;
 }

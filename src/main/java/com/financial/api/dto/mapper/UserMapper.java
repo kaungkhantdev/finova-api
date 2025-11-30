@@ -13,6 +13,8 @@ public class UserMapper {
         response.setEmail(user.getEmail());
         response.setUsername(user.getUsername());
         response.setAvatarUrl(user.getAvatarUrl());
+        response.setCurrency(user.getCurrency().getCurrency());
+        response.setCurrencySymbol(user.getCurrency().getSymbol());
         response.setBio(user.getBio());
         return response;
     }

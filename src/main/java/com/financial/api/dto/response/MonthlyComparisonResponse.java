@@ -13,10 +13,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MonthlyComparisonResponse {
-    private BigDecimal currentIncome;
-    private BigDecimal previousIncome;
+    private String currentIncome;
+    private String previousIncome;
     private BigDecimal incomeChangePercent;
-    private BigDecimal currentExpense;
-    private BigDecimal previousExpense;
+    private String incomeDifference;
+    private String currentExpense;
+    private String previousExpense;
     private BigDecimal expenseChangePercent;
+    private String expenseDifference;
 }

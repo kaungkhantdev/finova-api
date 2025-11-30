@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class WeeklyAmountResponse {
-    private BigDecimal weeklyAmount;
+    private String weeklyAmount;
     private LocalDate weekStart;
     private LocalDate weekEnd;
 }
