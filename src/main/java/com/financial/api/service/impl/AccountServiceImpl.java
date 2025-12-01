@@ -4,11 +4,13 @@ import com.financial.api.dto.mapper.AccountMapper;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
+import com.financial.api.dto.response.AccountWithTotalsResponse;
 import com.financial.api.dto.response.BalanceResponse;
 import com.financial.api.dto.response.MultiCurrencyConversionResponse;
 import com.financial.api.entity.*;
 import com.financial.api.repository.AccountRepository;
 import com.financial.api.repository.CurrencyRepository;
+import com.financial.api.repository.projection.AccountWithTotalsProjection;
 import com.financial.api.service.AccountService;
 import com.financial.api.service.ExternalApiService;
 import com.financial.api.util.AuthenticationUtil;
@@ -37,11 +39,11 @@ public class AccountServiceImpl implements AccountService {
     private final ExternalApiService externalApiService;
 
     @Override
-    public Page<AccountResponse> getAll(Pageable pageable) {
+    public Page<AccountWithTotalsResponse> getAll(Pageable pageable) {
         User currentUser = getCurrentUser();
 
-        Page<Account> accounts = accountRepository.findByUserAndIsDeletedFalse(currentUser, pageable);
-        return accounts.map(accountMapper::toResponse);
+        Page<AccountWithTotalsProjection> accounts = accountRepository.findByUserAndIsDeletedFalse(currentUser.getId(), pageable);
+        return accounts.map(this::mapToResponse);
     }
 
     @Override
@@ -133,6 +135,18 @@ public class AccountServiceImpl implements AccountService {
         response.setFormattedOriginalAmount(NumberFormatter.format(balance));
         response.setFormattedConversions(formattedConversions(convertedData.getConversions()));
         return response;
+    }
+
+    private AccountWithTotalsResponse mapToResponse(AccountWithTotalsProjection projection) {
+        return AccountWithTotalsResponse.builder()
+                .accountId(projection.getAccountId())
+                .accountName(projection.getAccountName())
+                .currency(projection.getCurrency())
+                .currencyCode(projection.getCurrencyCode())
+                .currencySymbol(projection.getCurrencySymbol())
+                .totalIncome(projection.getTotalIncome())
+                .totalExpense(projection.getTotalExpense())
+                .build();
     }
 
     /**

@@ -19,7 +19,6 @@ public class AccountMapper {
         Account account = new Account();
         account.setName(request.getName());
         account.setDescription(request.getDescription());
-        account.setAmount(request.getAmount());
         account.setUser(user);
         account.setCurrency(currency);
 
@@ -33,7 +32,6 @@ public class AccountMapper {
 
         account.setName(request.getName());
         account.setDescription(request.getDescription());
-        account.setAmount(request.getAmount());
     }
 
     public AccountResponse toResponse(Account account) {

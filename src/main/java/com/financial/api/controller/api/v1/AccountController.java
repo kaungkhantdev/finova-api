@@ -3,6 +3,7 @@ package com.financial.api.controller.api.v1;
 import com.financial.api.dto.request.AccountCreateRequest;
 import com.financial.api.dto.request.AccountUpdateRequest;
 import com.financial.api.dto.response.AccountResponse;
+import com.financial.api.dto.response.AccountWithTotalsResponse;
 import com.financial.api.dto.response.BalanceResponse;
 import com.financial.api.dto.response.MultiCurrencyConversionResponse;
 import com.financial.api.service.AccountService;
@@ -45,13 +46,13 @@ public class AccountController {
             summary = "Get all transactions",
             description = "Retrieve paginated list of all transactions. Requires authentication via Cookie (web) or Bearer token (mobile)."
     )
-    public ResponseEntity<AppApiResponse<List<AccountResponse>>> getAll(
+    public ResponseEntity<AppApiResponse<List<AccountWithTotalsResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<AccountResponse> transactions = accountService.getAll(pageable);
-        AppApiResponse<List<AccountResponse>> response = AppApiResponse.success(
+        Page<AccountWithTotalsResponse> transactions = accountService.getAll(pageable);
+        AppApiResponse<List<AccountWithTotalsResponse>> response = AppApiResponse.success(
                 "Get All Transactions Successfully",
                 transactions.getContent(),
                 new ApiPaginationMetadata(
@@ -141,23 +142,23 @@ public class AccountController {
     }
     
 
-    @Operation(
-            summary = "Delete an account",
-            description = "Performs a soft delete on the specified account (marks it as deleted rather than removing it)."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
-    })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAccount(
-            @Parameter(description = "ID of the account to delete", example = "1")
-            @PathVariable Long id) {
-
-        accountService.deleteAccount(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @Operation(
+//            summary = "Delete an account",
+//            description = "Performs a soft delete on the specified account (marks it as deleted rather than removing it)."
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+//            @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+//    })
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteAccount(
+//            @Parameter(description = "ID of the account to delete", example = "1")
+//            @PathVariable Long id) {
+//
+//        accountService.deleteAccount(id);
+//        return ResponseEntity.noContent().build();
+//    }
 
     @Operation(
             summary = "Get your balance",

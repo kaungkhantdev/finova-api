@@ -31,12 +31,4 @@ public class AccountUpdateRequest {
             example = "Updated description for clarity."
     )
     private String description;
-
-    @DecimalMin(value = "0.00", inclusive = true, message = "Amount cannot be negative")
-    @Digits(integer = 17, fraction = 2, message = "Amount must have at most 17 integer digits and 2 decimal places")
-    @Schema(
-            description = "Updated amount (if applicable)",
-            example = "7500.00"
-    )
-    private BigDecimal amount;
 }

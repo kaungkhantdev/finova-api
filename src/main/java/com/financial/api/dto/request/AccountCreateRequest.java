@@ -33,14 +33,4 @@ public class AccountCreateRequest {
             example = "This account is used for primary savings and bill payments."
     )
     private String description;
-
-    @NotNull(message = "Initial amount is required")
-    @DecimalMin(value = "0.00", inclusive = true, message = "Amount cannot be negative")
-    @Digits(integer = 17, fraction = 2, message = "Amount must have at most 17 integer digits and 2 decimal places")
-    @Schema(
-            description = "Initial balance or amount of the account",
-            example = "5000.00",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private BigDecimal amount;
 }
