@@ -69,17 +69,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query(
             value = """
-                    SELECT
-                        SUM(amount) AS weekly_amount,
-                        DATE_SUB(DATE(MIN(created_at)), INTERVAL WEEKDAY(MIN(created_at)) DAY) as week_start,
-                        DATE_ADD(DATE_SUB(DATE(MIN(created_at)), INTERVAL WEEKDAY(MIN(created_at)) DAY), INTERVAL 6 DAY) as week_end
-                    FROM transactions
-                    WHERE transaction_type_id = :transactionTypeId
-                        AND user_id = :userId
-                        AND is_deleted = 0
-                        AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-                    GROUP BY YEARWEEK(created_at, 1);
-                    """,
+                SELECT
+                    SUM(amount) AS weekly_amount,
+                    DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) as week_start,
+                    DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY) as week_end
+                FROM transactions
+                WHERE transaction_type_id = :transactionTypeId
+                    AND user_id = :userId
+                    AND is_deleted = 0
+                    AND created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                    AND created_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
+                """,
             nativeQuery = true
     )
     WeeklyAmountProjection getWeeklyAmount(

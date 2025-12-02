@@ -2,6 +2,7 @@ package com.financial.api.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import java.util.Objects;
 
@@ -48,18 +49,19 @@ public class ApiPaginationMetadata {
      * @param totalItems           total number of items
      */
     public ApiPaginationMetadata(int currentPageZeroBased, int pageSize, int totalPages, long totalItems) {
-        // Convert to one-indexed for client responses
-        this.currentPage = currentPageZeroBased + 1;
+        // Convert to one-indexed: 0 and 1 both become page 1, then 2→2, 3→3, etc.
+        this.currentPage = Math.max(currentPageZeroBased, 1);
+
         this.pageSize = pageSize;
         this.totalPages = totalPages;
-        this.lastPage = Math.max(1, totalPages); // Ensure at least page 1
+        this.lastPage = totalPages;
         this.totalItems = totalItems;
 
         // Calculate navigation
-        this.hasNext = this.currentPage < this.lastPage;
+        this.hasNext = this.currentPage < totalPages;
         this.hasPrev = this.currentPage > 1;
 
-        // Use null for next/prev when not available (cleaner JSON)
+        // Use null for next/prev when not available
         this.nextPage = this.hasNext ? this.currentPage + 1 : null;
         this.prevPage = this.hasPrev ? this.currentPage - 1 : null;
     }

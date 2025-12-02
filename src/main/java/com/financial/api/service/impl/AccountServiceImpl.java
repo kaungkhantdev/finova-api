@@ -141,6 +141,8 @@ public class AccountServiceImpl implements AccountService {
         return AccountWithTotalsResponse.builder()
                 .accountId(projection.getAccountId())
                 .accountName(projection.getAccountName())
+                .description(projection.getDescription())
+                .amount(projection.getAmount())
                 .currency(projection.getCurrency())
                 .currencyCode(projection.getCurrencyCode())
                 .currencySymbol(projection.getCurrencySymbol())

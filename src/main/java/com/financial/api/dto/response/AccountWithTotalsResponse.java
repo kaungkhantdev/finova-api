@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 public class AccountWithTotalsResponse {
     private Long accountId;
     private String accountName;
+    private String description;
+    private BigDecimal amount;
     private String currency;
     private String currencyCode;
     private String currencySymbol;

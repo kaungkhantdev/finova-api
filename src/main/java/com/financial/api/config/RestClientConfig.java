@@ -7,6 +7,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
+import static com.financial.api.constant.ExternalApiConstants.API_URL;
+import static com.financial.api.constant.ExternalApiConstants.HEADER;
+
 @Configuration
 public class RestClientConfig {
 
@@ -16,11 +19,11 @@ public class RestClientConfig {
     @Bean
     public RestClient restClient(RestClient.Builder builder) {
         return builder
-                .baseUrl("https://api.fastforex.io")
+                .baseUrl(API_URL)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .requestInterceptor((request, body, execution) -> {
                     // Add API key to each request
-                    request.getHeaders().add("X-API-Key", apiKey);
+                    request.getHeaders().add(HEADER, apiKey);
                     return execution.execute(request, body);
                 })
                 .build();

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
+import static com.financial.api.constant.ExternalApiConstants.EXCHANGE_ROUTE;
 import static com.financial.api.constant.TransactionConstants.DEFAULT_TARGET_CURRENCIES;
 
 @Slf4j
@@ -28,7 +29,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
         try {
             return restClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/fetch-matrix")
+                            .path(EXCHANGE_ROUTE)
                             .queryParam("from", fromCurrency)
                             .queryParam("to", toCurrencies)
                             .build())

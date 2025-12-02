@@ -21,6 +21,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
                    SELECT
                        ac.id AS account_id,
                        ac.name AS account_name,
+                       ac.amount AS amount,
+                       ac.description AS description,
                        cu.currency AS currency,
                        cu.currency_code AS currency_code,
                        cu.symbol AS currency_symbol,
