@@ -21,12 +21,6 @@ public interface CurrencyRepository extends JpaRepository<Currency, Long> {
     Page<Currency> findByUserOrIsSystemTrueAndIsDeletedFalse(@Param("user") User user, Pageable pageable);
 
     /**
-     * Find all system currencies or currencies owned by the user (not deleted) - List version
-     */
-    @Query("SELECT c FROM Currency c WHERE (c.user = :user OR c.isSystem = true) AND c.isDeleted = false")
-    List<Currency> findByUserOrIsSystemTrueAndIsDeletedFalse(@Param("user") User user);
-
-    /**
      * Check if user already has a currency with the given code
      */
     boolean existsByUserAndCodeAndIsDeletedFalse(User user, String code);

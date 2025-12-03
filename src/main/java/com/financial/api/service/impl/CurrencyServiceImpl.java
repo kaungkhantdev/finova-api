@@ -16,6 +16,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -37,6 +38,16 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .findByUserOrIsSystemTrueAndIsDeletedFalse(currentUser, pageable);
 
         return currencies.map(currencyMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CurrencyResponse> getAllNoPagination() {
+        // Get system currencies + user's own currencies
+        List<Currency> currencies = currencyRepository
+                .findAll();
+
+        return currencies.stream().map(currencyMapper::toResponse).toList();
     }
 
     @Override

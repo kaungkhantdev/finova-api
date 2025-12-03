@@ -158,8 +158,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                 ROUND(((curr.expense - prev.expense) / NULLIF(prev.expense, 0)) * 100, 1) AS expenseChangePercent
             FROM (
                 SELECT
-                    SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS income,
-                    SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS expense
+                    SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS income,
+                    SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS expense
                 FROM transactions
                 WHERE user_id = :userId
                   AND is_deleted = 0
@@ -167,8 +167,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             ) curr
             CROSS JOIN (
                 SELECT
-                    SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS income,
-                    SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS expense
+                    SUM(CASE WHEN transaction_type_id = 1 THEN amount ELSE 0 END) AS income,
+                    SUM(CASE WHEN transaction_type_id = 2 THEN amount ELSE 0 END) AS expense
                 FROM transactions
                 WHERE user_id = :userId
                   AND is_deleted = 0

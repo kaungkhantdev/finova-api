@@ -23,8 +23,6 @@ public class CurrencyMapper {
         response.setCurrency(currency.getCurrency());
         response.setCode(currency.getCode());
         response.setSymbol(currency.getSymbol());
-        response.setCreatedAt(currency.getCreatedAt());
-        response.setUpdatedAt(currency.getUpdatedAt());
         return response;
     }
 
