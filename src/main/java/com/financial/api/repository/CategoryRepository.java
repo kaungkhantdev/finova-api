@@ -14,9 +14,18 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     /**
      * Find all system currencies or currencies owned by the user (not deleted)
      */
-    @Query("SELECT c FROM Category c WHERE (c.user = :user OR c.isSystem = true) AND c.isDeleted = false")
-    Page<Category> findByUserOrIsSystemTrueAndIsDeletedFalse(@Param("user") User user, Pageable pageable);
-
+    @Query("SELECT c FROM Category c WHERE " +
+            "(c.user = :user OR c.isSystem = true) AND " +
+            "c.isDeleted = false AND " +
+            "(:keyword IS NULL OR :keyword = '' OR " +
+            "LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "ORDER BY c.createdAt DESC")
+    Page<Category> findByUserOrIsSystemTrueAndIsDeletedFalse(
+            @Param("user") User user,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
     /**
      * Find all system currencies or currencies owned by the user (not deleted)
      */

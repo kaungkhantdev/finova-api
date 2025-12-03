@@ -26,12 +26,12 @@ public class CategoryServiceImpl implements CategoryService {
     private final AuthenticationUtil authenticationUtil;
 
     @Override
-    public Page<CategoryResponse> getAll(Pageable pageable) {
+    public Page<CategoryResponse> getAll(Pageable pageable, String s) {
         User currentUser = getCurrentUser();
 
         // Get system + user's own
         Page<Category> categories = categoryRepository
-                .findByUserOrIsSystemTrueAndIsDeletedFalse(currentUser, pageable);
+                .findByUserOrIsSystemTrueAndIsDeletedFalse(currentUser, s, pageable);
 
         return categories.map(categoryMapper::toResponse);
     }

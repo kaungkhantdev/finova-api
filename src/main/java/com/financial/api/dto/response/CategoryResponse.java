@@ -16,6 +16,7 @@ public class CategoryResponse {
     private Long id;
     private String name;
     private String description;
+    private Boolean isSystem;
     private String avatarUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

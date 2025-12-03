@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TransactionService {
-    Page<TransactionResponse> getAll(Pageable pageable);
+    Page<TransactionResponse> getAll(Pageable pageable, String keyword);
     TransactionResponse createTransaction(TransactionCreateRequest request);
     TransactionResponse updateTransaction(Long id, TransactionUpdateRequest request);
     TransactionResponse getTransactionById(Long id);

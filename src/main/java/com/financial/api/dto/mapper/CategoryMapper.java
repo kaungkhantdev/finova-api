@@ -19,6 +19,7 @@ public class CategoryMapper {
         CategoryResponse response = new CategoryResponse();
         response.setId(category.getId());
         response.setName(category.getName());
+        response.setIsSystem(category.getIsSystem());
         response.setDescription(category.getDescription());
         response.setCreatedAt(category.getCreatedAt());
         response.setUpdatedAt(category.getUpdatedAt());

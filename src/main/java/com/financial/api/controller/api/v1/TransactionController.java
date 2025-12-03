@@ -38,12 +38,14 @@ public class TransactionController {
     )
     public ResponseEntity<AppApiResponse<List<TransactionResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String s
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<TransactionResponse> transactions = transactionService.getAll(pageable);
+        Page<TransactionResponse> transactions = transactionService.getAll(pageable, s);
         AppApiResponse<List<TransactionResponse>> response = AppApiResponse.success(
                 "Get All Transactions Successfully",
+
                 transactions.getContent(),
                 new ApiPaginationMetadata(
                         transactions.getNumber(),

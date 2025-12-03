@@ -38,10 +38,12 @@ public class CategoryController {
     )
     public ResponseEntity<AppApiResponse<List<CategoryResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String s
+
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<CategoryResponse> categories = categoryService.getAll(pageable);
+        Page<CategoryResponse> categories = categoryService.getAll(pageable, s);
         AppApiResponse<List<CategoryResponse>> response = AppApiResponse.success(
                 "Get All Categories Successfully",
                 categories.getContent(),

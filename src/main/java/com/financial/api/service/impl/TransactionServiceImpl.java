@@ -45,11 +45,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TransactionResponse> getAll(Pageable pageable) {
+    public Page<TransactionResponse> getAll(Pageable pageable, String keyword) {
         User currentUser = getCurrentUser();
         log.debug("Fetching all transactions for user: {}", currentUser.getId());
 
-        Page<Transaction> transactions = transactionRepository.findByUserAndIsDeletedFalse(currentUser, pageable);
+        Page<Transaction> transactions = transactionRepository.findByUserAndIsDeletedFalse(currentUser, keyword, pageable);
         return transactions.map(transactionMapper::toResponse);
     }
 

@@ -12,8 +12,18 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    @Query("SELECT c FROM Transaction c WHERE (c.user = :user) AND c.isDeleted = false")
-    Page<Transaction> findByUserAndIsDeletedFalse(@Param("user") User user, Pageable pageable);
+    @Query("SELECT c FROM Transaction c WHERE " +
+            "(c.user = :user) AND " +
+            "c.isDeleted = false AND " +
+            "(:keyword IS NULL OR :keyword = '' OR " +
+            "LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
+            "ORDER BY c.createdAt DESC")
+    Page<Transaction> findByUserAndIsDeletedFalse(
+            @Param("user") User user,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 
     @Query(
             value = """
