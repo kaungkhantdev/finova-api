@@ -3,6 +3,7 @@ package com.financial.api.config;
 import com.financial.api.security.CustomAuthenticationEntryPoint;
 import com.financial.api.security.JwtAuthenticationFilter;
 import com.financial.api.security.CustomUserDetailsService;
+import com.financial.api.security.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final RateLimitFilter rateLimitFilter;
 
 
     /**
@@ -56,6 +58,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint)
