@@ -1,0 +1,34 @@
+name: Setup Java Environment
+description: 'Sets up JDK with caching for Maven/Gradle projects'
+
+inputs:
+  java-version:
+    description: 'Java version to set up'
+    required: false
+    default: '21'
+  distribution:
+    description: 'Java distribution to set up'
+    required: false
+    default: 'temurin'
+  cache:
+    description: 'Maven cache to set up'
+    required: false
+    default: 'maven'
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK ${{ inputs.java-version }}
+      uses: actions/setup-java@v5
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.cache }}
+    
+    - name: Display Java version
+      shell: bash
+      run: |
+        echo "Java version configured:"
+        java -version
+        echo "Maven version:"
+        mvn -version

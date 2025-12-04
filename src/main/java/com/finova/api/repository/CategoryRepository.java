@@ -1,0 +1,40 @@
+package com.finova.api.repository;
+
+import com.finova.api.entity.Category;
+import com.finova.api.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface CategoryRepository extends JpaRepository<Category, Long> {
+    /**
+     * Find all system currencies or currencies owned by the user (not deleted)
+     */
+    @Query("SELECT c FROM Category c WHERE " +
+            "(c.user = :user OR c.isSystem = true) AND " +
+            "c.isDeleted = false AND " +
+            "(:keyword IS NULL OR :keyword = '' OR " +
+            "LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "ORDER BY c.createdAt DESC")
+    Page<Category> findByUserOrIsSystemTrueAndIsDeletedFalse(
+            @Param("user") User user,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+    /**
+     * Find all system currencies or currencies owned by the user (not deleted)
+     */
+    @Query("SELECT c FROM Category c WHERE (c.user = :user OR c.isSystem = true) AND c.isDeleted = false")
+    List<Category> findAllByUserOrIsSystemTrueAndIsDeletedFalse(@Param("user") User user);
+
+    /**
+     * Check if user already has a category with the given name
+     */
+    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.user = :user AND LOWER(c.name) = LOWER(:name) AND c.isDeleted = false")
+    boolean existsByUserAndNameIgnoreCaseAndIsDeletedFalse(@Param("user") User user, @Param("name") String name);
+}
