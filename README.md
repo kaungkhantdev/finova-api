@@ -17,25 +17,20 @@ A comprehensive REST API for personal financial management built with Spring Boo
 - [Contributing](#contributing)
 - [License](#license)
 
-## ✨ Features
+## Features
 
 ### Core Features
 -  **User Management** - User registration, authentication, and profile management
 -  **Account Management** - Multiple account types (checking, savings, credit cards)
 -  **Transaction Tracking** - Income, expenses, transfers with categorization
--  **Categories & Tags** - Organize transactions with custom categories
--  **Multi-Currency Support** - Handle multiple currencies with conversion
+-  **Categories** - Organize transactions with custom categories
 -  **Financial Analytics** - Spending analysis, trends, and reports
--  **Budget Management** - Set and track budgets by category
 -  **RESTful API** - Clean, documented API endpoints
 
 ### Advanced Features
 -  **Dashboard Analytics** - Financial overview and insights
--  **Advanced Search** - Filter transactions by date, amount, category
--  **Export Data** - Export transactions to CSV/PDF
 -  **Security** - JWT authentication and authorization
--  **Audit Trail** - Track all financial changes
--  **Internationalization** - Multi-language support
+-  **Rate Limiting** - Prevent abuse and protect against DDoS attacks
 
 ##  Tech Stack
 
@@ -44,6 +39,8 @@ A comprehensive REST API for personal financial management built with Spring Boo
 - **Spring Boot 3.x** - Application framework
 - **Spring Security** - Authentication and authorization
 - **Spring Data JPA** - Data persistence layer
+- **JWT** - JSON Web Tokens for authentication
+- **Mail & Template** - Send emails with templates using Thymeleaf
 - **MySQL 8.0+** - Primary database
 - **Flyway** - Database migration management
 - **Maven** - Dependency management and build tool
@@ -71,102 +68,33 @@ Before running this application, ensure you have:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/financial-api.git
-cd financial-api
+git clone https://github.com/your-username/finova-api.git
+cd finova-api
+```
+
+### 2. Database Setup
+Install MySQL 8.0+ and create a database named `finova`.
+```sql
+CREATE DATABASE finova;
 ```
 
 ### 2. Set Up Environment Variables
-Create a `.env` file in the root directory:
-```env
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=financial_db
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-
-# JWT Configuration
-JWT_SECRET=your-256-bit-secret-key-here
-JWT_EXPIRATION=86400000
-
-# Application Configuration
-SPRING_PROFILES_ACTIVE=dev
-SERVER_PORT=8080
+Copy the `.env.example` file to `.env` and update the values:
+```bash
+cp .env.example .env
 ```
 
-### 3. Configure Application Properties
-Update `src/main/resources/application.properties`:
-```properties
-# Database Configuration
-spring.datasource.url=jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:financial_db}
-spring.datasource.username=${DB_USERNAME:root}
-spring.datasource.password=${DB_PASSWORD:password}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-# JPA/Hibernate Configuration
-spring.jpa.hibernate.ddl-auto=validate
-spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.open-in-view=false
-
-# Flyway Configuration
-spring.flyway.enabled=true
-spring.flyway.locations=classpath:db/migration
-spring.flyway.baseline-on-migrate=true
-
-# Server Configuration
-server.port=${SERVER_PORT:8080}
-
-# JWT Configuration
-jwt.secret=${JWT_SECRET:defaultSecretKey}
-jwt.expiration=${JWT_EXPIRATION:86400000}
-
-# Logging Configuration
-logging.level.com.financial.api=INFO
-logging.level.org.springframework.security=DEBUG
-logging.level.org.hibernate.SQL=DEBUG
-logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
-
-# Spring Boot Configuration
-spring.application.name=Financial Management API
-spring.profiles.active=${SPRING_PROFILES_ACTIVE:dev}
-
-# Jackson Configuration (JSON serialization)
-spring.jackson.serialization.write-dates-as-timestamps=false
-spring.jackson.time-zone=UTC
-
-# Validation Messages
-spring.messages.basename=validation
-
-# Actuator Configuration (for monitoring)
-management.endpoints.web.exposure.include=health,info,metrics
-management.endpoint.health.show-details=when-authorized
-```
-
-### 4. Install Dependencies
+### 3. Install Dependencies
 ```bash
 mvn clean install
 ```
 
-## 🗄️ Database Setup
-
-### Option 1: Local MySQL Setup
-1. **Install MySQL 8.0+**
-2. **Create Database:**
-```sql
-CREATE DATABASE financial_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'finapp'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON financial_db.* TO 'finapp'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-3. **Run Migrations:**
+### 4. Run Migrations
 ```bash
 mvn flyway:migrate
 ```
 
-## 🏃‍♂️ Running the Application
+## Running the Application
 
 ### Development Mode
 ```bash
@@ -179,19 +107,19 @@ mvn spring-boot:run
 mvn clean package -DskipTests
 
 # Run JAR
-java -jar target/financial-api-1.0.0.jar
+java -jar target/finova-api-1.0.0.jar
 ```
 
-### Docker
+## Running with Docker
 ```bash
 # copy .env
 cp .env.example .env
 
 # Build image
-docker build -t financial-api .
+docker build -t finova-api .
 
 # Run container
-docker run -p 8080:8080 --env-file .env financial-api
+docker run -p 8080:8080 --env-file .env finova-api
 ```
 
 The API will be available at: `http://localhost:8080`
@@ -210,39 +138,6 @@ Once the application is running, access the interactive API documentation:
 POST /api/v1/auth/register    # User registration
 POST /api/v1/auth/login       # User login
 POST /api/v1/auth/refresh     # Refresh token
-```
-
-#### Users
-```http
-GET    /api/v1/users/profile     # Get user profile
-PUT    /api/v1/users/profile     # Update profile
-DELETE /api/v1/users/profile     # Delete account
-```
-
-#### Accounts
-```http
-GET    /api/v1/accounts          # Get all accounts
-POST   /api/v1/accounts          # Create account
-GET    /api/v1/accounts/{id}     # Get account by ID
-PUT    /api/v1/accounts/{id}     # Update account
-DELETE /api/v1/accounts/{id}     # Delete account
-```
-
-#### Transactions
-```http
-GET    /api/v1/transactions      # Get all transactions
-POST   /api/v1/transactions      # Create transaction
-GET    /api/v1/transactions/{id} # Get transaction by ID
-PUT    /api/v1/transactions/{id} # Update transaction
-DELETE /api/v1/transactions/{id} # Delete transaction
-```
-
-#### Analytics
-```http
-GET /api/v1/analytics/dashboard     # Dashboard summary
-GET /api/v1/analytics/spending      # Spending analysis
-GET /api/v1/analytics/income        # Income analysis
-GET /api/v1/analytics/trends        # Financial trends
 ```
 
 ## Project Structure
@@ -274,85 +169,6 @@ financial-management-api/
 ├── Dockerfile                    # Docker build
 ├── pom.xml                       # Maven configuration
 └── README.md
-```
-
-## Configuration
-
-### Environment Profiles
-- **`dev`** - Development environment
-- **`test`** - Testing environment
-- **`prod`** - Production environment
-
-### Key Properties
-```properties
-# Security
-jwt.secret=Your JWT secret key
-jwt.expiration=Token expiration time
-
-# Database
-spring.datasource.url=Database connection URL
-spring.jpa.hibernate.ddl-auto=validate
-
-# Flyway
-spring.flyway.enabled=true
-spring.flyway.baseline-on-migrate=true
-
-# Logging
-logging.level.com.financial.api=INFO
-logging.level.org.springframework.security=DEBUG
-```
-
-## Usage Examples
-
-### Create a User Account
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "username": "johndoe",
-    "password": "securePassword123"
-  }'
-```
-
-### Login
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "johndoe",
-    "password": "securePassword123"
-  }'
-```
-
-### Create an Account
-```bash
-curl -X POST http://localhost:8080/api/v1/accounts \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Checking Account",
-    "description": "Main checking account",
-    "amount": 1000.00,
-    "categoryId": 1,
-    "currencyId": 1
-  }'
-```
-
-### Record a Transaction
-```bash
-curl -X POST http://localhost:8080/api/v1/transactions \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Grocery Shopping",
-    "description": "Weekly groceries",
-    "amount": -87.50,
-    "accountId": 1,
-    "categoryId": 5,
-    "transactionTypeId": 2
-  }'
 ```
 
 ## Testing
@@ -387,19 +203,6 @@ Coverage reports are generated in `target/site/jacoco/index.html`
 - [ ] Configure backup strategy
 - [ ] Review security settings
 - [ ] Set up CI/CD pipeline
-
-### Docker Production Deployment
-```bash
-# Build production image
-docker build -f Dockerfile.prod -t financial-api:prod .
-
-# Run with production settings
-docker run -d \
-  --name financial-api-prod \
-  -p 8080:8080 \
-  --env-file .env.prod \
-  financial-api:prod
-```
 
 ## Contributing
 
@@ -442,4 +245,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for better financial management**
+**Made with Love for better finova** 
