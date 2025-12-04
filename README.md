@@ -129,6 +129,11 @@ docker build -t finova-api .
 docker run -p 8080:8080 --env-file .env finova-api
 ```
 
+## Running with Docker Compose
+```bash
+docker-compose up --build
+```
+
 The API will be available at: `http://localhost:8080`
 
 ## API Documentation

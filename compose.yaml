@@ -1,0 +1,66 @@
+services:
+  finova-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finova-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - DB_URL=jdbc:mysql://finova-db:3306/finova
+      - DB_USER_NAME=finova
+      - DB_PASSWORD=finova
+    depends_on:
+      finova-db:
+        condition: service_healthy
+      finova-migrate:
+        condition: service_completed_successfully
+    networks:
+      - finova-net
+
+  finova-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    container_name: finova-migrate
+    env_file:
+      - .env
+    environment:
+      - DB_URL=jdbc:mysql://finova-db:3306/finova
+      - DB_USER_NAME=finova
+      - DB_PASSWORD=finova
+    depends_on:
+      finova-db:
+        condition: service_healthy
+    networks:
+      - finova-net
+
+  finova-db:
+    image: mysql:8.0
+    restart: always
+    container_name: finova-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=finova
+      - MYSQL_DATABASE=finova
+      - MYSQL_USER=finova
+      - MYSQL_PASSWORD=finova
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - finova-db-data:/var/lib/mysql
+    networks:
+      - finova-net
+
+networks:
+  finova-net:
+    driver: bridge
+
+volumes:
+  finova-db-data:
