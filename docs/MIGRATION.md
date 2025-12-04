@@ -54,7 +54,7 @@ mvn flyway:validate \
 
 ### Ensures applied migrations match the files on disk (no accidental edits).
 
-Clean database ⚠️ (Dangerous!)
+Clean database (Dangerous!)
 ```bash
 mvn flyway:clean
 

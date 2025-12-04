@@ -1,0 +1,15 @@
+package com.finova.api.repository.projection;
+
+import java.math.BigDecimal;
+
+public interface AccountWithTotalsProjection {
+    Long getAccountId();
+    String getAccountName();
+    String getDescription();
+    BigDecimal getAmount();
+    String getCurrency();
+    String getCurrencyCode();
+    String getCurrencySymbol();
+    BigDecimal getTotalIncome();
+    BigDecimal getTotalExpense();
+}

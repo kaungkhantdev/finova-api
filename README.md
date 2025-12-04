@@ -75,18 +75,25 @@ cd finova-api
 ### 2. Database Setup
 Install MySQL 8.0+ and create a database named `finova`.
 ```sql
-CREATE DATABASE finova;
+CREATE DATABASE finova
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 2. Set Up Environment Variables
 Copy the `.env.example` file to `.env` and update the values:
 ```bash
 cp .env.example .env
+
+# Load environment variables
+set -a
+source .env
+set +a
 ```
 
 ### 3. Install Dependencies
 ```bash
-mvn clean install
+mvn clean install -DskipTests
 ```
 
 ### 4. Run Migrations
@@ -112,13 +119,13 @@ java -jar target/finova-api-1.0.0.jar
 
 ## Running with Docker
 ```bash
-# copy .env
-cp .env.example .env
-
 # Build image
 docker build -t finova-api .
 
-# Run container
+# If your db is external, change db host in .env file
+# localhost to host.docker.internal
+
+# If your db is internal, use the following command:
 docker run -p 8080:8080 --env-file .env finova-api
 ```
 
@@ -138,37 +145,6 @@ Once the application is running, access the interactive API documentation:
 POST /api/v1/auth/register    # User registration
 POST /api/v1/auth/login       # User login
 POST /api/v1/auth/refresh     # Refresh token
-```
-
-## Project Structure
-
-```
-financial-management-api/
-├── src/
-│   ├── main/
-│   │   ├── java/com/financial/api/
-│   │   │   ├── config/           # Configuration classes
-│   │   │   ├── controller/       # REST controllers
-│   │   │   ├── dto/              # Data Transfer Objects
-│   │   │   ├── entity/           # JPA entities
-│   │   │   ├── exception/        # Custom exceptions
-│   │   │   ├── mapper/           # MapStruct mappers
-│   │   │   ├── repository/       # JPA repositories
-│   │   │   ├── security/         # Security configuration
-│   │   │   ├── service/          # Business logic
-│   │   │   └── util/             # Utility classes
-│   │   └── resources/
-│   │       ├── db/migration/     # Flyway migrations
-│   │       ├── application.yml   # Configuration
-│   │       └── logback-spring.xml
-│   └── test/                     # Test classes
-├── docker/                       # Docker configurations
-├── docs/                         # Documentation
-├── .env                          # Environment variables
-├── docker-compose.yml            # Docker Compose
-├── Dockerfile                    # Docker build
-├── pom.xml                       # Maven configuration
-└── README.md
 ```
 
 ## Testing

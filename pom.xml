@@ -8,11 +8,11 @@
         <version>3.4.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.financial</groupId>
-    <artifactId>financial-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>financial-api</name>
-    <description>Financial project for Spring Boot</description>
+    <groupId>com.finova</groupId>
+    <artifactId>finova-api</artifactId>
+    <version>1.0.0</version>
+    <name>finova-api</name>
+    <description>Finova project for Spring Boot</description>
     <url/>
     <licenses>
         <license/>
@@ -133,6 +133,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>10.20.1</version>
+                <configuration>
+                    <url>${env.DB_URL}</url>
+                    <user>${env.DB_USER_NAME}</user>
+                    <password>${env.DB_PASSWORD}</password>
+                    <locations>
+                        <location>filesystem:src/main/resources/db/migration</location>
+                    </locations>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
