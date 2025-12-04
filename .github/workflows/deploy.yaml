@@ -88,7 +88,7 @@ jobs:
             sleep 10
           done
           
-          echo "❌ Health check failed"
+          echo " Health check failed"
           exit 1
 
       - name: Notify Slack on success
@@ -97,13 +97,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ Deployment to DEV succeeded",
+              "text": " Deployment to DEV succeeded",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Deployment to Development*\n✅ Status: Success\n🔗 <https://dev.example.com|Visit Site>\n📦 Commit: ${{ github.sha }}\n👤 By: ${{ github.actor }}"
+                    "text": "*Deployment to Development*\n Status: Success\n🔗 <https://dev.example.com|Visit Site>\n📦 Commit: ${{ github.sha }}\n👤 By: ${{ github.actor }}"
                   }
                 }
               ]
@@ -118,13 +118,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "❌ Deployment to DEV failed",
+              "text": " Deployment to DEV failed",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Deployment to Development*\n❌ Status: Failed\n📦 Commit: ${{ github.sha }}\n👤 By: ${{ github.actor }}"
+                    "text": "*Deployment to Development*\ Status: Failed\n📦 Commit: ${{ github.sha }}\n👤 By: ${{ github.actor }}"
                   }
                 }
               ]
